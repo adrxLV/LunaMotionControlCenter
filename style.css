@@ -1,0 +1,355 @@
+
+
+#stop-switch.active {
+  background: #BF0000 !important;
+}
+#stop-switch.active {
+  background: #BF0000 !important;
+}
+#stop-switch:hover, #stop-switch:focus {
+  box-shadow: 0 0 4px #BF0000;
+}
+
+.slider-vertical-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 32px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #000d23;
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  overflow: hidden;
+}
+
+.dashboard-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Vertical Sliders */
+
+.vertical-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  max-width: 18vw;
+  height: 625px;
+  max-height: 50vh;
+  min-height: 180px;
+  position: static;
+  margin: 0 0 0 0;
+}
+
+.left-slider {
+  left: 45px;
+  top: 217px;
+}
+
+.right-slider {
+  right: 45px;
+  top: 217px;
+}
+
+
+.slider-track {
+  background: #162946;
+  border-radius: 16px;
+  width: 45px;
+  height: 100%;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+
+/* Custom vertical range slider */
+.range-slider.vertical {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 500px;
+  height: 40px;
+  background: transparent;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  z-index: 2;
+  margin-left: -22.5px; 
+}
+
+.range-slider.vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ffce34;
+  border-radius: 16px;
+  width: 40px;
+  height: 90px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.range-slider.vertical:hover::-webkit-slider-thumb,
+.range-slider.vertical:focus::-webkit-slider-thumb {
+  background: #d4af37;
+  transform: scale(1.22);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.22);
+}
+.range-slider.vertical::-moz-range-thumb {
+  background: #ffce34;
+  border-radius: 16px;
+  width: 40px;
+  height: 90px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.range-slider.vertical:hover::-moz-range-thumb,
+.range-slider.vertical:focus::-moz-range-thumb {
+  background: #d4af37;
+  transform: scale(1.22);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.22);
+}
+.range-slider.vertical::-ms-thumb {
+  background: #ffce34;
+  border-radius: 16px;
+  width: 40px;
+  height: 90px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.range-slider.vertical:hover::-ms-thumb,
+.range-slider.vertical:focus::-ms-thumb {
+  background: #d4af37;
+  transform: scale(1.22);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.22);
+}
+
+.range-slider.vertical::-webkit-slider-runnable-track {
+  height: 39px;
+  background: transparent;
+}
+.range-slider.vertical::-ms-fill-lower,
+.range-slider.vertical::-ms-fill-upper {
+  background: transparent;
+}
+.range-slider.vertical:focus {
+  outline: none;
+}
+.range-slider.vertical::-moz-range-track {
+  background: transparent;
+}
+.range-slider.vertical::-ms-tooltip {
+  display: none;
+}
+
+/* Main Panel */
+.main-panel {
+  background: #001330;
+  border: 1px solid #192539;
+  border-radius: 60px;
+  padding: 40px;
+  width: 1372px;
+  height: 930px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.dashboard-title {
+  color: #ffce34;
+  font-size: 48px;
+  margin: 0;
+}
+
+.camera-feed {
+  background: #162946;
+  border: 1px solid #162946;
+  border-radius: 16px;
+  padding: 30px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.camera-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.camera-header span {
+  color: #ffffff;
+  font-size: 32px;
+}
+
+.maximize-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.camera-stream {
+  display: block;
+  width: 100%;
+  border: 1px solid #001430;
+  border-radius: 16px;
+  max-width: 1232px;
+  max-height: 505px;
+  margin: 0 auto;
+}
+
+.status-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  height: 119px;
+}
+
+.status-box {
+  background: #162946;
+  border: 1px solid #162946;
+  border-radius: 14px;
+  padding: 16px 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.status-label {
+  color: #ffce34;
+  font-size: 32px;
+  text-transform: uppercase;
+}
+
+.status-value {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.control-switch {
+  background: #162946;
+  border: 1px solid #162946;
+  border-radius: 14px;
+  padding: 16px 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.control-switch span {
+  color: #ffce34;
+  font-size: 32px;
+}
+
+
+
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 24px;
+  transition: background 0.3s;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+
+.switch::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+
+.switch.active {
+  background: #4caf50;
+}
+.switch.active::before {
+  transform: translateX(20px);
+}
+
+
+/* Optional: Add focus/hover effect */
+.switch:hover {
+  box-shadow: 0 0 4px #4caf50;
+}
+
+
+
+/* Side Toggles */
+.side-toggle {
+background: #162946;
+border-radius: 16px;
+padding: 13px 10px;
+width: 174px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin: 0 auto;
+position: static;
+}
+
+
+/* Layout for side groups */
+.side-left-group, .side-right-group {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 0;
+  height: 100%;
+  justify-content: center;
+}
+.side-left-group {
+  left: 45px;
+}
+.side-right-group {
+  right: 45px;
+}
+
+
+.side-toggle span {
+  color: #ffffff;
+  font-size: 20px;
+}
+

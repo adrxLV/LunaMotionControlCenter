@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rover Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="dashboard-container">
+
+    <!-- Side Left: Avoid O. / Slider / Follow O. -->
+    <div class="side-left-group">
+      <div class="slider-vertical-group">
+        <div class="side-toggle left-toggle">
+          <span>Avoid O.</span>
+          <div class="switch" id="avoid-switch"></div>
+        </div>
+        <div class="vertical-slider left-slider">
+          <div class="slider-track">
+            <input type="range" min="0" max="100" value="50" class="range-slider vertical" id="left-range-slider">
+          </div>
+        </div>
+        <div class="side-toggle left-toggle">
+          <span>Follow O.</span>
+          <div class="switch" id="follow-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Panel -->
+    <div class="main-panel">
+      <h1 class="dashboard-title">Control / Override Mode</h1>
+
+      <!-- Camera Feed -->
+      <div class="camera-feed">
+        <div class="camera-header">
+          <span>Rover Camera</span>
+          <img src="/ASSETS/maximize-svgrepo-com 1.svg" alt="Maximize" class="maximize-icon">
+        </div>
+        <img src="/ASSETS/frontview light.jpg" alt="Rover Camera Stream" class="camera-stream">
+      </div>
+
+      <!-- Status and Control Panel -->
+      <div class="status-controls">
+
+        <div class="control-switch">
+          <span>Stop</span>
+          <div class="switch" id="stop-switch"></div>
+        </div>
+
+        <div class="status-box">
+          <span class="status-label">Left IR</span>
+          <span class="status-value" id="left-ir-value">0</span>
+        </div>
+
+        <div class="status-box">
+          <span class="status-label">Ultrasonic</span>
+          <span class="status-value" id="ultrasonic-value">0 cm</span>
+        </div>
+
+        <div class="status-box">
+          <span class="status-label">Right IR</span>
+          <span class="status-value" id="right-ir-value">0</span>
+        </div>
+
+        <div class="control-switch">
+          <span>STT</span>
+          <div class="switch" id="stt-switch"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Side Right: Slide Lock / Slider / HeadLamp -->
+    <div class="side-right-group">
+      <div class="slider-vertical-group">
+        <div class="side-toggle right-toggle">
+          <span>Slide Lock</span>
+          <div class="switch active" id="slide-lock-switch"></div>
+        </div>
+        <div class="vertical-slider right-slider">
+          <div class="slider-track">
+            <input type="range" min="0" max="100" value="50" class="range-slider vertical" id="right-range-slider">
+          </div>
+        </div>
+        <div class="side-toggle right-toggle">
+          <span>HeadLamp</span>
+          <div class="switch" id="headlamp-switch"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+<script>
+// Remove focus do slider vertical ao sair com o mouse
+document.querySelectorAll('.range-slider.vertical').forEach(function(slider) {
+  slider.addEventListener('mouseleave', function() {
+    this.blur();
+  });
+});
+</script>
+</body>
+
+</html>
