@@ -353,3 +353,337 @@ position: static;
   font-size: 20px;
 }
 
+/* Main Dashboard Styles */
+.main-dashboard-container {
+  width: 100vw;
+  height: 100vh;
+  background: #000D23;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.side-panel {
+  height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 150px;
+  max-width: 200px;
+  flex-shrink: 0;
+}
+
+.right-panel {
+  opacity: 0;
+}
+
+.logo-section {
+  margin-bottom: auto;
+}
+
+.logo {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.datetime-section {
+  margin-top: auto;
+  margin-left: auto;
+}
+
+.datetime-text {
+  text-align: center;
+  color: white;
+  font-size: 20px;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.center-panel {
+  width: 906px;
+  max-width: calc(100vw - 400px);
+  height: 930px;
+  max-height: calc(100vh - 40px);
+  padding: 40px;
+  background: #001330;
+  border-radius: 60px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overflow: hidden;
+}
+
+.main-title {
+  color: white;
+  font-size: 48px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.map-section {
+  width: 100%;
+  height: 470px;
+  padding: 30px;
+  background: #162946;
+  border-radius: 16px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+.map-title {
+  color: white;
+  font-size: 32px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+
+.map-container {
+  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.rover-marker {
+  position: absolute;
+  top: 45%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 100px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  z-index: 3;
+}
+
+.rover-marker.near-marker {
+  background: rgba(255, 0, 0, 0.8); /* Cor vermelha mais intensa quando próximo */
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); /* Brilho vermelho */
+  transform: translate(-50%, -50%) scale(1.2); /* Aumenta ligeiramente o tamanho */
+}
+
+.rover-icon {
+  width: 15px;
+  height: 15px;
+  background: #FFCE34;
+  border: 1px solid #BF0000;
+  border-radius: 50%;
+}
+
+.position-marker {
+  position: absolute;
+  background: white;
+  border-radius: 100px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+.marker-1 {
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.marker-2 {
+  top: 42%;
+  left: 43%;
+  transform: translate(-50%, -50%);
+}
+
+.pink-marker {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.green-marker {
+  width: 15px;
+  height: 15px;
+}
+
+.status-section {
+  height: 140px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.status-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 20px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.status-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-indicator.online {
+  background: #05D158;
+  border: 2px solid #059B42;
+}
+
+.status-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.speed-icon {
+  background: url('ASSETS/SpeedIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.direction-icon {
+  background: url('ASSETS/CompassIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.mode-icon {
+  background: url('ASSETS/RoverModeIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.signal-icon {
+  background: url('ASSETS/SignalIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.strength-icon {
+  background: url('ASSETS/StrangthIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.status-label,
+.status-value,
+.status-unit {
+  color: white;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+
+.navigation-section {
+  height: 119px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.nav-button {
+  flex: 1;
+  height: 100%;
+  padding: 16px 6px;
+  background: #162946;
+  border-radius: 14px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.nav-button:hover {
+  background: #1a2d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 206, 52, 0.3);
+}
+
+.nav-icon {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.update-icon {
+  background: url('ASSETS/UpdateIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.places-icon {
+  background: url('ASSETS/FolderIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.satellites-icon {
+  background: url('ASSETS/SatteliteIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.configs-icon {
+  background: url('ASSETS/ConfigurationIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.override-icon {
+  background: url('ASSETS/OverrideIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.nav-label {
+  color: white;
+  font-size: 18px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  text-align: center;
+}
+

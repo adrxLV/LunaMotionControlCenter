@@ -48,6 +48,77 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
 
 window.addEventListener('DOMContentLoaded', function() {
   const leftSlider = document.getElementById('left-range-slider');
+
+  // Navigation functionality for main dashboard
+  const overrideBtn = document.getElementById('override-btn');
+  
+  if (overrideBtn) {
+    overrideBtn.addEventListener('click', function() {
+      window.location.href = 'override.html';
+    });
+  }
+
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'GMT'
+    };
+    
+    const dateTimeElements = document.querySelectorAll('.datetime-text');
+    const formattedDateTime = `DATE: ${now.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })} | ${now.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'GMT'
+    })} GMT+0`;
+    
+    dateTimeElements.forEach(element => {
+      element.textContent = formattedDateTime;
+    });
+  }
+
+  // Update status values (simulated real-time data)
+  function updateStatusValues() {
+    const ultrasonicValue = document.getElementById('ultrasonic-value');
+    const leftIrValue = document.getElementById('left-ir-value');
+    const rightIrValue = document.getElementById('right-ir-value');
+    
+    if (ultrasonicValue) {
+      // Simulate ultrasonic readings
+      const distance = Math.floor(Math.random() * 50) + 10;
+      ultrasonicValue.textContent = `${distance} cm`;
+    }
+    
+    if (leftIrValue) {
+      // Simulate IR sensor readings
+      const leftIr = Math.floor(Math.random() * 100);
+      leftIrValue.textContent = leftIr;
+    }
+    
+    if (rightIrValue) {
+      // Simulate IR sensor readings  
+      const rightIr = Math.floor(Math.random() * 100);
+      rightIrValue.textContent = rightIr;
+    }
+  }
+
+  // Initialize datetime update
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+  
+  // Initialize status updates (if on override page)
+  if (document.getElementById('ultrasonic-value')) {
+    setInterval(updateStatusValues, 2000);
+  }
   const rightSlider = document.getElementById('right-range-slider');
   
   if (leftSlider && rightSlider) {

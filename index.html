@@ -4,107 +4,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rover Dashboard</title>
+  <title>Luna Motion Control Center</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div class="dashboard-container">
+  <div class="main-dashboard-container">
+    
+    <!-- Left Side Panel -->
+    <div class="side-panel left-panel">
+      <div class="logo-section">
+        <img src="ASSETS/FULLTRANSPARENT Branco 1.png" alt="Rover Logo" class="logo">
+      </div>
+      <div class="datetime-section">
+        <span class="datetime-text">DATE: 22 / 07 / 2025 | 11:30 GMT+0</span>
+      </div>
+    </div>
 
-    <!-- Side Left: Avoid O. / Slider / Follow O. -->
-    <div class="side-left-group">
-      <div class="slider-vertical-group">
-        <div class="side-toggle left-toggle">
-          <span>Avoid O.</span>
-          <div class="switch" id="avoid-switch"></div>
+    <!-- Main Center Panel -->
+    <div class="center-panel">
+      <h1 class="main-title">Rover Control Center</h1>
+      
+      <!-- Map Section -->
+      <div class="map-section">
+        <div class="map-header">
+          <span class="map-title">Map - Moon, Faustini Crater</span>
+          <img src="ASSETS/maximize-svgrepo-com 1.svg" alt="Maximize" class="maximize-icon">
         </div>
-        <div class="vertical-slider left-slider">
-          <div class="slider-track">
-            <input type="range" min="0" max="100" value="50" class="range-slider vertical" id="left-range-slider">
+        <div class="map-container">
+          <img src="ASSETS/moon map.jpg" alt="Moon Map" class="map-image">
+          <!-- Rover Position Markers -->
+          <div class="rover-marker main-rover">
+            <img src="ASSETS/mars-rover-svgrepo-com 1.svg"/>
+          </div>
+          <div class="position-marker marker-1">
+            <div class="marker-icon pink-marker"><img src="ASSETS/Vector.svg"></div>
+          </div>
+          <div class="position-marker marker-2">
+            <div class="marker-icon green-marker"><img src="ASSETS/Motor.svg"></div>
           </div>
         </div>
-        <div class="side-toggle left-toggle">
-          <span>Follow O.</span>
-          <div class="switch" id="follow-switch"></div>
+      </div>
+
+      <!-- Status Information -->
+      <div class="status-section">
+        <div class="status-grid">
+          <div class="status-row">
+            <div class="status-indicator online"></div>
+            <span class="status-label">Status:</span>
+            <span class="status-value">Online</span>
+          </div>
+          <div class="status-row">
+            <div class="status-icon signal-icon"></div>
+            <span class="status-label">Signal:</span>
+            <span class="status-value">Strong</span>
+          </div>
+          <div class="status-row">
+            <div class="status-icon strength-icon"></div>
+            <span class="status-label">Strength:</span>
+            <span class="status-value">89%</span>
+          </div>
+        </div>
+        <div class="status-grid">
+          <div class="status-row">
+            <div class="status-icon speed-icon"></div>
+            <span class="status-label">Speed:</span>
+            <span class="status-value">4</span>
+            <span class="status-unit">m/s</span>
+          </div>
+          <div class="status-row">
+            <div class="status-icon direction-icon"></div>
+            <span class="status-label">Direction:</span>
+            <span class="status-value">NE</span>
+          </div>
+          <div class="status-row">
+            <div class="status-icon mode-icon"></div>
+            <span class="status-label">Mode:</span>
+            <span class="status-value">Auto</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="navigation-section">
+        <div class="nav-button" id="update-btn">
+          <div class="nav-icon update-icon"></div>
+          <span class="nav-label">Update</span>
+        </div>
+        <div class="nav-button" id="places-btn">
+          <div class="nav-icon places-icon"></div>
+          <span class="nav-label">Places</span>
+        </div>
+        <div class="nav-button" id="satellites-btn">
+          <div class="nav-icon satellites-icon"></div>
+          <span class="nav-label">Satellites</span>
+        </div>
+        <div class="nav-button" id="configs-btn">
+          <div class="nav-icon configs-icon"></div>
+          <span class="nav-label">Configs</span>
+        </div>
+        <div class="nav-button" id="override-btn">
+          <div class="nav-icon override-icon"></div>
+          <span class="nav-label">Override</span>
         </div>
       </div>
     </div>
 
-    <!-- Main Dashboard Panel -->
-    <div class="main-panel">
-      <h1 class="dashboard-title">Control / Override Mode</h1>
-
-      <!-- Camera Feed -->
-      <div class="camera-feed">
-        <div class="camera-header">
-          <span>Rover Camera</span>
-          <img src="/ASSETS/maximize-svgrepo-com 1.svg" alt="Maximize" class="maximize-icon">
-        </div>
-        <img src="/ASSETS/frontview light.jpg" alt="Rover Camera Stream" class="camera-stream">
+    <!-- Right Side Panel (Hidden/Spacer) -->
+    <div class="side-panel right-panel">
+      <div class="logo-section">
+        <img src="ASSETS/mars-rover-svgrepo-com 1.svg" alt="Rover Logo" class="logo">
       </div>
-
-      <!-- Status and Control Panel -->
-      <div class="status-controls">
-
-        <div class="control-switch">
-          <span>Stop</span>
-          <div class="switch" id="stop-switch"></div>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Left IR</span>
-          <span class="status-value" id="left-ir-value">0</span>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Ultrasonic</span>
-          <span class="status-value" id="ultrasonic-value">0 cm</span>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Right IR</span>
-          <span class="status-value" id="right-ir-value">0</span>
-        </div>
-
-        <div class="control-switch">
-          <span>STT</span>
-          <div class="switch" id="stt-switch"></div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Side Right: Slide Lock / Slider / HeadLamp -->
-    <div class="side-right-group">
-      <div class="slider-vertical-group">
-        <div class="side-toggle right-toggle">
-          <span>Slide Lock</span>
-          <div class="switch active" id="slide-lock-switch"></div>
-        </div>
-        <div class="vertical-slider right-slider">
-          <div class="slider-track">
-            <input type="range" min="0" max="100" value="50" class="range-slider vertical" id="right-range-slider">
-          </div>
-        </div>
-        <div class="side-toggle right-toggle">
-          <span>HeadLamp</span>
-          <div class="switch" id="headlamp-switch"></div>
-        </div>
+      <div class="datetime-section">
+        <span class="datetime-text">DATE: 22 / 07 / 2025 | 11:30 GMT+0</span>
       </div>
     </div>
 
   </div>
 
-  <script src="dashboard.js"></script>
-</body>
-<script>
-// Remove focus do slider vertical ao sair com o mouse
-document.querySelectorAll('.range-slider.vertical').forEach(function(slider) {
-  slider.addEventListener('mouseleave', function() {
-    this.blur();
-  });
-});
-</script>
+  <script src="main-dashboard.js"></script>
 </body>
 
 </html>
