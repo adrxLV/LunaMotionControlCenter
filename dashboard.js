@@ -1,29 +1,70 @@
-// Efeito magnético no centro dos sliders verticais
-function addMagneticSnap(sliderId, snapValue = 50, snapRange = 5) {
-  const slider = document.getElementById(sliderId);
-  if (!slider) return;
-  slider.addEventListener('change', function() {
-    const value = parseInt(slider.value, 10);
-    if (Math.abs(value - snapValue) <= snapRange) {
-      slider.value = snapValue;
-      slider.classList.add('snap-effect');
-      setTimeout(() => slider.classList.remove('snap-effect'), 150);
+
+let isSyncing = false;
+let slideLockActive = false;
+
+// Função para  snap magnético
+function applyMagneticSnap(slider, snapValue = 50, snapRange = 5) {
+  const value = parseInt(slider.value, 10);
+  if (Math.abs(value - snapValue) <= snapRange && value !== snapValue) {
+    slider.value = snapValue;
+    slider.classList.add('snap-effect');
+    setTimeout(() => slider.classList.remove('snap-effect'), 150);
+    return true; 
+  }
+  return false;
+}
+function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10) {
+  if (isSyncing) return;
+  
+  isSyncing = true;
+  
+  const snapApplied = applyMagneticSnap(sourceSlider, snapValue, snapRange);
+  
+  if (slideLockActive && targetSlider) {
+    targetSlider.value = sourceSlider.value;
+    // Atualiza a UI 
+    const event = new Event('input', { bubbles: true });
+    targetSlider.dispatchEvent(event);
+    
+    if (snapApplied) {
+      targetSlider.classList.add('snap-effect');
+      setTimeout(() => targetSlider.classList.remove('snap-effect'), 150);
     }
-  });
+  }
+  
+  const leftSlider = document.getElementById('left-range-slider');
+  const rightSlider = document.getElementById('right-range-slider');
+  if (leftSlider && rightSlider) {
+    console.log(`Left: ${leftSlider.value} | Right: ${rightSlider.value}`);
+    if (slideLockActive && leftSlider.value !== rightSlider.value) {
+      console.warn('Slide Lock está ativo, mas os valores não estão iguais!');
+    }
+  }
+  
+  setTimeout(() => {
+    isSyncing = false;
+  }, 50);
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  addMagneticSnap('left-range-slider');
-  addMagneticSnap('right-range-slider');
+  const leftSlider = document.getElementById('left-range-slider');
+  const rightSlider = document.getElementById('right-range-slider');
+  
+  if (leftSlider && rightSlider) {
+    leftSlider.addEventListener('change', function() {
+      syncSliders(leftSlider, rightSlider);
+    });
+    
+    rightSlider.addEventListener('change', function() {
+      syncSliders(rightSlider, leftSlider);
+    });
+  }
 });
-// dashboard.js
 // JavaScript para controlar switches e sliders na dashboard
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Switches: garantir visual de switch moderno
     document.querySelectorAll('.switch').forEach(function (sw) {
-        // Adiciona o knob se não existir
         if (!sw.querySelector('.switch-knob')) {
             const knob = document.createElement('div');
             knob.className = 'switch-knob';
@@ -34,35 +75,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Slide Lock: sincronizar sliders esquerdo e direito
     const slideLockSwitch = document.getElementById('slide-lock-switch');
     const leftSlider = document.getElementById('left-range-slider');
     const rightSlider = document.getElementById('right-range-slider');
-    // Ativo por defeito se o switch já tem a classe 'active' (HTML)
-    let slideLockActive = slideLockSwitch && slideLockSwitch.classList.contains('active');
+    
+    if (slideLockSwitch) {
+        slideLockActive = slideLockSwitch.classList.contains('active');
+    }
 
     if (slideLockSwitch && leftSlider && rightSlider) {
         slideLockSwitch.addEventListener('click', function () {
             slideLockActive = !slideLockActive;
             if (slideLockActive) {
-                // Sincroniza imediatamente
+                isSyncing = true;
                 rightSlider.value = leftSlider.value;
-                // Dispara evento para atualizar UI
-                rightSlider.dispatchEvent(new Event('input'));
+                const updateEvent = new Event('input');
+                rightSlider.dispatchEvent(updateEvent);
+                setTimeout(() => {
+                    isSyncing = false;
+                }, 50);
             }
         });
 
-        // Quando um slider muda, se slide lock estiver ativo, sincroniza o outro
         leftSlider.addEventListener('input', function () {
+            if (isSyncing) return;
             if (slideLockActive) {
+                isSyncing = true;
                 rightSlider.value = leftSlider.value;
-                rightSlider.dispatchEvent(new Event('input'));
+                const event = new Event('input', { bubbles: true });
+                rightSlider.dispatchEvent(event);
+                setTimeout(() => {
+                    isSyncing = false;
+                }, 10);
             }
         });
+        
         rightSlider.addEventListener('input', function () {
+            if (isSyncing) return;
             if (slideLockActive) {
+                isSyncing = true;
                 leftSlider.value = rightSlider.value;
-                leftSlider.dispatchEvent(new Event('input'));
+                const event = new Event('input', { bubbles: true });
+                leftSlider.dispatchEvent(event);
+                setTimeout(() => {
+                    isSyncing = false;
+                }, 10);
             }
         });
     }
