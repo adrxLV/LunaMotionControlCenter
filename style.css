@@ -57,6 +57,20 @@ body {
   position: relative;
 }
 
+/* Linha de marcação do zero no meio do slider */
+.slider-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 1px;
+  z-index: 1;
+}
+
 
 /* Custom vertical range slider */
 .range-slider.vertical {

@@ -7,6 +7,9 @@ const SERVER_URL = 'ws://192.168.4.1:8765';
 let websocket = null;
 let isConnected = false;
 let connectionTimeout = null;
+let continuousUpdateInterval = null;
+const UPDATE_INTERVAL = 50; // Enviar a cada 50ms (20 comandos por segundo)
+const USE_ANIMATION_FRAME = false; // Mudar para true para usar requestAnimationFrame (60fps)
 
 // WebSocket functions
 function connectToServer() {
@@ -121,12 +124,90 @@ function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
   console.log('[Estado] Estado da conexao:', status);
   
-  // You can add visual indicators here later
-  // For now, just console logging
+  if (connected) {
+    startContinuousUpdates();
+  } else {
+    stopContinuousUpdates();
+  }
+}
+
+function startContinuousUpdates() {
+  if (continuousUpdateInterval) {
+    clearInterval(continuousUpdateInterval);
+  }
+  
+  if (USE_ANIMATION_FRAME) {
+    console.log('[Continuo] A iniciar envio continuo usando requestAnimationFrame (~60fps)');
+    startAnimationFrameUpdates();
+  } else {
+    console.log('[Continuo] A iniciar envio continuo de dados a cada', UPDATE_INTERVAL, 'ms (', (1000/UPDATE_INTERVAL), 'comandos por segundo)');
+    startIntervalUpdates();
+  }
+}
+
+function startIntervalUpdates() {
+  continuousUpdateInterval = setInterval(() => {
+    sendCurrentSliderValues();
+  }, UPDATE_INTERVAL);
+}
+
+function startAnimationFrameUpdates() {
+  function updateLoop() {
+    if (isConnected) {
+      sendCurrentSliderValues();
+      requestAnimationFrame(updateLoop);
+    }
+  }
+  requestAnimationFrame(updateLoop);
+}
+
+function sendCurrentSliderValues() {
+  const leftSlider = document.getElementById('left-range-slider');
+  const rightSlider = document.getElementById('right-range-slider');
+  
+  if (leftSlider && rightSlider) {
+    const leftValue = leftSlider.value || 0;
+    const rightValue = rightSlider.value || 0;
+    
+    // Log apenas ocasionalmente para não sobrecarregar a consola
+    if (Math.random() < 0.02) { // Apenas 2% dos logs
+      console.log('[Continuo] Enviando velocidade atual - Esquerda:', leftValue, 'Direita:', rightValue);
+    }
+    sendSpeedCommandContinuous(leftValue, rightValue);
+  }
+}
+
+function stopContinuousUpdates() {
+  if (continuousUpdateInterval) {
+    console.log('[Continuo] A parar envio continuo de dados');
+    clearInterval(continuousUpdateInterval);
+    continuousUpdateInterval = null;
+  }
+  // Para requestAnimationFrame, simplesmente mudamos isConnected para false
+}
+
+function sendSpeedCommandContinuous(leftValue, rightValue) {
+  const command = {
+    "K": parseInt(leftValue),
+    "Q": parseInt(rightValue)
+  };
+  
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    try {
+      const message = JSON.stringify(command);
+      websocket.send(message);
+      // Log muito reduzido para não sobrecarregar a consola com alta frequencia
+      if (Math.random() < 0.005) { // Apenas 0.5% dos logs
+        console.log('[Continuo] Enviado:', message);
+      }
+    } catch (error) {
+      console.error('[Continuo] Falha ao enviar:', error);
+    }
+  }
 }
 
 // Função para  snap magnético
-function applyMagneticSnap(slider, snapValue = 50, snapRange = 5) {
+function applyMagneticSnap(slider, snapValue = 0, snapRange = 5) {
   const value = parseInt(slider.value, 10);
   if (Math.abs(value - snapValue) <= snapRange && value !== snapValue) {
     slider.value = snapValue;
@@ -136,7 +217,7 @@ function applyMagneticSnap(slider, snapValue = 50, snapRange = 5) {
   }
   return false;
 }
-function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10) {
+function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 10) {
   if (isSyncing) return;
   
   isSyncing = true;
@@ -160,7 +241,7 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
   const rightSlider = document.getElementById('right-range-slider');
   if (leftSlider && rightSlider) {
     console.log('[Sliders] Esquerda:', leftSlider.value, '| Direita:', rightSlider.value);
-    sendSpeedCommand(leftSlider.value, rightSlider.value);
+    // Comando sera enviado automaticamente pelo sistema continuo
     
     if (slideLockActive && leftSlider.value !== rightSlider.value) {
       console.warn('[Sliders] Slide Lock esta ativo, mas os valores nao estao iguais!');
@@ -247,6 +328,18 @@ window.addEventListener('DOMContentLoaded', function() {
   updateDateTime();
   setInterval(updateDateTime, 1000);
   
+  // Initialize continuous speed updates when sliders are available
+  const continuousCheckInterval = setInterval(() => {
+    const leftSlider = document.getElementById('left-range-slider');
+    const rightSlider = document.getElementById('right-range-slider');
+    
+    if (leftSlider && rightSlider && isConnected && !continuousUpdateInterval) {
+      console.log('[Inicializacao] Sliders encontrados, a iniciar envio continuo');
+      startContinuousUpdates();
+      clearInterval(continuousCheckInterval);
+    }
+  }, 1000);
+  
   // Initialize status updates (if on override page)
   if (document.getElementById('ultrasonic-value')) {
     setInterval(updateStatusValues, 2000);
@@ -312,9 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 10);
             }
-            // Send real-time command
-            const rightValue = document.getElementById('right-range-slider').value;
-            sendSpeedCommand(leftSlider.value, rightValue);
+            // Comando sera enviado automaticamente pelo sistema continuo
         });
         
         rightSlider.addEventListener('input', function () {
@@ -329,9 +420,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 10);
             }
-            // Send real-time command
-            const leftValue = document.getElementById('left-range-slider').value;
-            sendSpeedCommand(leftValue, rightSlider.value);
+            // Comando sera enviado automaticamente pelo sistema continuo
         });
     }
 
@@ -340,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const track = slider.closest('.slider-track');
         const thumb = track.querySelector('.slider-thumb');
         function updateThumb() {
-            const min = parseFloat(slider.min) || 0;
+            const min = parseFloat(slider.min) || -100;
             const max = parseFloat(slider.max) || 100;
             const val = parseFloat(slider.value);
             const percent = (val - min) / (max - min);
@@ -353,13 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         slider.addEventListener('input', function() {
             updateThumb();
-            // Send real-time command when any slider changes
-            const leftSlider = document.getElementById('left-range-slider');
-            const rightSlider = document.getElementById('right-range-slider');
-            if (leftSlider && rightSlider) {
-                console.log('[Slider] Slider vertical alterado, a enviar comando...');
-                sendSpeedCommand(leftSlider.value, rightSlider.value);
-            }
+            // Comando sera enviado automaticamente pelo sistema continuo
         });
         slider.addEventListener('input', updateThumb);
         window.addEventListener('resize', updateThumb);
@@ -369,4 +452,5 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('[Inicializacao] Inicializacao do dashboard completa!');
     console.log('[Inicializacao] URL WebSocket:', SERVER_URL);
     console.log('[Inicializacao] Sliders configurados para controlo em tempo real');
+    console.log('[Inicializacao] Envio continuo configurado para', UPDATE_INTERVAL, 'ms');
 });
