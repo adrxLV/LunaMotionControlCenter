@@ -7,6 +7,10 @@ const SERVER_URL = 'ws://192.168.4.1:8765';
 let websocket = null;
 let isConnected = false;
 let connectionTimeout = null;
+let continuousUpdateInterval = null;
+const UPDATE_INTERVAL = 250;
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
 
 // Command sending configuration
 let lastCommand = null;
@@ -19,7 +23,24 @@ const DEBOUNCE_MS = 50; // Debounce slider input
 
 // WebSocket functions
 function connectToServer() {
+<<<<<<< HEAD
   console.log('[WebSocket] Conectando ao servidor:', SERVER_URL);
+=======
+  console.log('[WebSocket] A tentar conectar a:', SERVER_URL, '(Tentativa', connectionAttempts + 1, 'de', MAX_CONNECTION_ATTEMPTS, ')');
+  
+  if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+    console.error('[WebSocket] Maximo de tentativas excedido. Verifique:');
+    console.error('[WebSocket] 1. Se o servidor esta ativo em', SERVER_URL);
+    console.error('[WebSocket] 2. Se consegue fazer ping a 192.168.4.1');
+    console.error('[WebSocket] 3. Se a porta 8765 esta aberta');
+    console.error('[WebSocket] A aguardar 10 segundos antes de tentar novamente...');
+    setTimeout(() => {
+      connectionAttempts = 0;
+      connectToServer();
+    }, 10000);
+    return;
+  }
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
   
   try {
     websocket = new WebSocket(SERVER_URL);
@@ -27,14 +48,27 @@ function connectToServer() {
     // Set connection timeout
     connectionTimeout = setTimeout(() => {
       if (websocket.readyState === WebSocket.CONNECTING) {
+<<<<<<< HEAD
         console.error('[WebSocket] Timeout - Servidor nao respondeu');
+=======
+        console.error('[WebSocket] TIMEOUT - Servidor nao respondeu em 5 segundos');
+        console.error('[WebSocket] Verifique se o rover esta ligado e conectado');
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
         websocket.close();
+        connectionAttempts++;
+        setTimeout(connectToServer, 2000);
       }
     }, 5000);
     
     websocket.onopen = function(event) {
+<<<<<<< HEAD
       console.log('[WebSocket] Conectado com sucesso');
+=======
+      console.log('[WebSocket] ✅ CONECTADO com sucesso a:', SERVER_URL);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
       clearTimeout(connectionTimeout);
+      connectionAttempts = 0; // Reset attempts on successful connection
       isConnected = true;
       updateConnectionStatus(true);
     };
@@ -49,26 +83,48 @@ function connectToServer() {
     };
     
     websocket.onclose = function(event) {
+<<<<<<< HEAD
       console.log('[WebSocket] Conexao fechada - Codigo:', event.code);
+=======
+      console.log('[WebSocket] ❌ DESCONECTADO. Codigo:', event.code, 'Razao:', event.reason);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
       clearTimeout(connectionTimeout);
       isConnected = false;
       updateConnectionStatus(false);
       
+      connectionAttempts++;
       // Auto-reconnect after 3 seconds
       setTimeout(connectToServer, 3000);
     };
     
     websocket.onerror = function(error) {
+<<<<<<< HEAD
       console.error('[WebSocket] Erro - Verifique se o servidor esta ativo');
+=======
+      console.error('[WebSocket] ❌ ERRO DE CONEXAO:', error);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      console.error('[WebSocket] DIAGNÓSTICO:');
+      console.error('[WebSocket] - Verifique se o rover esta ligado');
+      console.error('[WebSocket] - Verifique se esta conectado ao Wi-Fi do rover');
+      console.error('[WebSocket] - Tente fazer ping a 192.168.4.1');
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
       clearTimeout(connectionTimeout);
       isConnected = false;
       updateConnectionStatus(false);
+      connectionAttempts++;
     };
     
   } catch (error) {
+<<<<<<< HEAD
     console.error('[WebSocket] Falha ao criar conexao WebSocket');
+=======
+    console.error('[WebSocket] ❌ ERRO ao criar WebSocket:', error);
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
     isConnected = false;
     updateConnectionStatus(false);
+    connectionAttempts++;
+    setTimeout(connectToServer, 2000);
   }
 }
 
@@ -96,20 +152,33 @@ function sendSpeedCommand(leftValue, rightValue) {
     "M": headLampState
   };
   
+<<<<<<< HEAD
   // Always store the command for continuous sending
   lastCommand = command;
   
+=======
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     try {
       const message = JSON.stringify(command);
       websocket.send(message);
+<<<<<<< HEAD
       lastSentCommand = { ...command }; // Track what was actually sent
       console.log('[Comando] Enviado:', message);
+=======
+      console.log('[Comando] ✅ Enviado:', message);
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
     } catch (error) {
-      console.error('[Comando] Falha ao enviar comando:', error);
+      console.error('[Comando] ❌ Falha ao enviar:', error);
     }
   } else {
+<<<<<<< HEAD
     console.warn('[Comando] WebSocket nao esta pronto - Comando ignorado');
+=======
+    const statusText = getWebSocketStatusText();
+    console.warn('[Comando] ⚠️ WebSocket nao conectado. Estado:', statusText);
+    console.warn('[Comando] Comando nao enviado:', command);
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
   }
 }
 
@@ -161,7 +230,71 @@ function handleServerResponse(data) {
 
 function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
+<<<<<<< HEAD
   // Visual indicators can be added here later
+=======
+  console.log('[Estado] Estado da conexao:', status);
+  
+  if (connected) {
+    startContinuousUpdates();
+  } else {
+    stopContinuousUpdates();
+  }
+}
+
+function startContinuousUpdates() {
+  if (continuousUpdateInterval) {
+    clearInterval(continuousUpdateInterval);
+  }
+  
+  console.log('[Continuo] A iniciar envio continuo de dados a cada', UPDATE_INTERVAL, 'ms');
+  
+  continuousUpdateInterval = setInterval(() => {
+    const leftSlider = document.getElementById('left-range-slider');
+    const rightSlider = document.getElementById('right-range-slider');
+    
+    if (leftSlider && rightSlider) {
+      const leftValue = leftSlider.value || 50;
+      const rightValue = rightSlider.value || 50;
+      
+      console.log('[Continuo] Enviando velocidade atual - Esquerda:', leftValue, 'Direita:', rightValue);
+      sendSpeedCommandContinuous(leftValue, rightValue);
+    }
+  }, UPDATE_INTERVAL);
+}
+
+function stopContinuousUpdates() {
+  if (continuousUpdateInterval) {
+    console.log('[Continuo] A parar envio continuo de dados');
+    clearInterval(continuousUpdateInterval);
+    continuousUpdateInterval = null;
+  }
+}
+
+function sendSpeedCommandContinuous(leftValue, rightValue) {
+  const command = {
+    "K": parseInt(leftValue),
+    "Q": parseInt(rightValue)
+  };
+  
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    try {
+      const message = JSON.stringify(command);
+      websocket.send(message);
+      // Log muito reduzido para não sobrecarregar a consola
+      if (Math.random() < 0.01) { // Apenas 1% dos logs
+        console.log('[Continuo] Enviado:', message);
+      }
+    } catch (error) {
+      console.error('[Continuo] ❌ Falha ao enviar:', error);
+    }
+  } else {
+    // Apenas log ocasional quando desconectado
+    if (Math.random() < 0.1) {
+      console.warn('[Continuo] ⚠️ WebSocket desconectado - comandos não enviados');
+    }
+  }
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
 }
 
 // Função para snap magnético
@@ -286,6 +419,18 @@ window.addEventListener('DOMContentLoaded', function() {
   updateDateTime();
   setInterval(updateDateTime, 1000);
   
+  // Initialize continuous speed updates when sliders are available
+  const continuousCheckInterval = setInterval(() => {
+    const leftSlider = document.getElementById('left-range-slider');
+    const rightSlider = document.getElementById('right-range-slider');
+    
+    if (leftSlider && rightSlider && isConnected && !continuousUpdateInterval) {
+      console.log('[Inicializacao] Sliders encontrados, a iniciar envio continuo');
+      startContinuousUpdates();
+      clearInterval(continuousCheckInterval);
+    }
+  }, 1000);
+  
   // Initialize status updates (if on override page)
   if (document.getElementById('ultrasonic-value')) {
     setInterval(updateStatusValues, 2000);
@@ -375,11 +520,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
+<<<<<<< HEAD
             // Use debounced command sending
             const rightValue = parseInt(document.getElementById('right-range-slider').value);
             const leftValue = parseInt(leftSlider.value);
             
             sendSpeedCommandDebounced(leftValue, rightValue);
+=======
+            // Manual command on slider change (immediate feedback)
+            const rightValue = document.getElementById('right-range-slider').value;
+            sendSpeedCommand(leftSlider.value, rightValue);
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
         });
         
         rightSlider.addEventListener('input', function () {
@@ -393,11 +544,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
+<<<<<<< HEAD
             // Use debounced command sending
             const leftValue = parseInt(document.getElementById('left-range-slider').value);
             const rightValue = parseInt(rightSlider.value);
             
             sendSpeedCommandDebounced(leftValue, rightValue);
+=======
+            // Manual command on slider change (immediate feedback)
+            const leftValue = document.getElementById('left-range-slider').value;
+            sendSpeedCommand(leftValue, rightSlider.value);
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
         });
     }
 
@@ -419,7 +576,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         slider.addEventListener('input', function() {
             updateThumb();
+<<<<<<< HEAD
             // Use debounced command sending for slider changes
+=======
+            // Manual command on slider change (immediate feedback)
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
             const leftSlider = document.getElementById('left-range-slider');
             const rightSlider = document.getElementById('right-range-slider');
             if (leftSlider && rightSlider) {
@@ -434,5 +595,12 @@ document.addEventListener('DOMContentLoaded', function () {
         updateThumb();
     });
     
+<<<<<<< HEAD
     // Initialization complete
+=======
+    console.log('[Inicializacao] Inicializacao do dashboard completa!');
+    console.log('[Inicializacao] URL WebSocket:', SERVER_URL);
+    console.log('[Inicializacao] Sliders configurados para controlo em tempo real');
+    console.log('[Inicializacao] Envio continuo configurado para', UPDATE_INTERVAL, 'ms');
+>>>>>>> fe2cd98e86b704930b1b9c844b55e8cda89491c6
 });

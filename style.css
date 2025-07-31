@@ -10,12 +10,14 @@ body {
   margin: 0;
   font-family: "Arial", sans-serif;
   overflow: hidden;
+  min-height: 100vh;
 }
 
 .dashboard-container {
   position: relative;
   width: 100vw;
   height: 100vh;
+  min-height: 600px;
 }
 
 /* Vertical Sliders */
@@ -43,7 +45,6 @@ body {
   right: 45px;
   top: 217px;
 }
-
 
 .slider-track {
   background: #162946;
@@ -147,8 +148,10 @@ body {
   border: 1px solid #192539;
   border-radius: 60px;
   padding: 40px;
-  width: 1372px;
-  height: 930px;
+  width: min(1372px, 85vw);
+  height: min(930px, 80vh);
+  max-width: 1372px;
+  max-height: 930px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -160,8 +163,9 @@ body {
 
 .dashboard-title {
   color: #ffce34;
-  font-size: 48px;
+  font-size: clamp(24px, 4vw, 48px);
   margin: 0;
+  text-align: center;
 }
 
 .camera-feed {
@@ -183,12 +187,12 @@ body {
 
 .camera-header span {
   color: #ffffff;
-  font-size: 32px;
+  font-size: clamp(18px, 2.5vw, 32px);
 }
 
 .maximize-icon {
-  width: 30px;
-  height: 30px;
+  width: clamp(20px, 2vw, 30px);
+  height: clamp(20px, 2vw, 30px);
 }
 
 .camera-stream {
@@ -196,8 +200,10 @@ body {
   width: 100%;
   border: 1px solid #001430;
   border-radius: 16px;
-  max-width: 1232px;
-  max-height: 505px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
   margin: 0 auto;
 }
 
@@ -205,8 +211,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 50px;
-  height: 119px;
+  gap: clamp(10px, 3vw, 50px);
+  height: auto;
+  min-height: 80px;
+  flex-wrap: wrap;
 }
 
 .status-box {
@@ -215,6 +223,7 @@ body {
   border-radius: 14px;
   padding: 16px 6px;
   flex: 1;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -224,13 +233,13 @@ body {
 
 .status-label {
   color: #ffce34;
-  font-size: 32px;
+  font-size: clamp(16px, 2.5vw, 32px);
   text-transform: uppercase;
 }
 
 .status-value {
   color: #ffffff;
-  font-size: 20px;
+  font-size: clamp(14px, 1.5vw, 20px);
 }
 
 .control-switch {
@@ -239,6 +248,7 @@ body {
   border-radius: 14px;
   padding: 16px 6px;
   flex: 1;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -250,7 +260,7 @@ body {
 
 .control-switch span {
   color: #ffce34;
-  font-size: 32px;
+  font-size: clamp(20px, 2.5vw, 32px);
 }
 
 
@@ -303,7 +313,7 @@ body {
 background: #162946;
 border-radius: 16px;
 padding: 13px 10px;
-width: 174px;
+width: clamp(140px, 15vw, 174px);
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -332,7 +342,7 @@ position: static;
 
 .side-toggle span {
   color: #ffffff;
-  font-size: 20px;
+  font-size: clamp(16px, 1.8vw, 20px);
 }
 
 /* Main Dashboard Styles */
@@ -391,7 +401,7 @@ position: static;
   width: 906px;
   max-width: calc(100vw - 400px);
   height: 930px;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh - 60px);
   padding: 40px;
   background: #001330;
   border-radius: 60px;
@@ -930,5 +940,298 @@ position: static;
 .popup-overlay.show {
   opacity: 1;
   visibility: visible;
+}
+
+/* ========== RESPONSIVE DESIGN - HORIZONTAL ONLY ========== */
+
+/* Tablets pequenos (768-1024px) */
+@media screen and (max-width: 1024px) and (min-width: 768px) and (orientation: landscape) {
+  /* Dashboard principal */
+  .center-panel {
+    width: min(650px, 65vw);
+    height: min(580px, 70vh);
+    padding: 20px;
+    gap: 15px;
+  }
+  
+  .main-title {
+    font-size: clamp(28px, 3vw, 36px);
+  }
+  
+  .map-section {
+    height: min(320px, 30vh);
+    padding: 20px;
+  }
+  
+  .map-title {
+    font-size: clamp(20px, 2.2vw, 24px);
+  }
+  
+  .datetime-text {
+    font-size: clamp(14px, 1.3vw, 16px);
+  }
+  
+  .status-label, .status-value, .status-unit {
+    font-size: clamp(14px, 1.3vw, 16px);
+  }
+  
+  .nav-label {
+    font-size: clamp(12px, 1.2vw, 14px);
+  }
+  
+  .nav-icon {
+    width: clamp(20px, 1.8vw, 24px);
+    height: clamp(20px, 1.8vw, 24px);
+  }
+  
+  .navigation-section {
+    height: auto;
+    min-height: 80px;
+    gap: 15px;
+  }
+  
+  .nav-button {
+    min-width: 60px;
+    padding: 12px 4px;
+  }
+  
+  .side-panel {
+    min-width: 120px;
+    max-width: 150px;
+    padding: 15px;
+  }
+  
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Override page */
+  .main-panel {
+    width: min(750px, 75vw);
+    height: min(550px, 70vh);
+    padding: 20px;
+    border-radius: 35px;
+    gap: 15px;
+  }
+  
+  .dashboard-title {
+    font-size: clamp(24px, 3vw, 32px);
+  }
+  
+  .camera-feed {
+    padding: 20px;
+  }
+  
+  .camera-header span {
+    font-size: clamp(18px, 2vw, 24px);
+  }
+  
+  .maximize-icon {
+    width: clamp(18px, 1.8vw, 24px);
+    height: clamp(18px, 1.8vw, 24px);
+  }
+  
+  .status-controls {
+    gap: clamp(8px, 2vw, 30px);
+    min-height: 70px;
+  }
+  
+  .status-label {
+    font-size: clamp(16px, 2vw, 24px);
+  }
+  
+  .status-value {
+    font-size: clamp(14px, 1.6vw, 18px);
+  }
+  
+  .control-switch span {
+    font-size: clamp(16px, 2vw, 24px);
+  }
+  
+  .side-left-group {
+    left: 15px;
+  }
+  
+  .side-right-group {
+    right: 15px;
+  }
+  
+  .side-toggle {
+    width: 130px;
+    padding: 8px 6px;
+  }
+  
+  .side-toggle span {
+    font-size: 16px;
+  }
+  
+  .vertical-slider {
+    height: 400px;
+    width: 60px;
+  }
+  
+  .range-slider.vertical {
+    width: 350px;
+    height: 35px;
+  }
+  
+  .range-slider.vertical::-webkit-slider-thumb {
+    width: 35px;
+    height: 70px;
+  }
+  
+  .range-slider.vertical::-moz-range-thumb {
+    width: 35px;
+    height: 70px;
+  }
+  
+  .range-slider.vertical::-ms-thumb {
+    width: 35px;
+    height: 70px;
+  }
+}
+
+/* Tablets grandes / Laptops pequenos (1025-1366px) */
+@media screen and (max-width: 1366px) and (min-width: 1025px) and (orientation: landscape) {
+  /* Dashboard principal */
+  .center-panel {
+    width: min(750px, 70vw);
+    height: min(720px, 75vh);
+    padding: 28px;
+  }
+  
+  .main-title {
+    font-size: clamp(32px, 3.5vw, 42px);
+  }
+  
+  .map-section {
+    height: min(400px, 35vh);
+    padding: 25px;
+  }
+  
+  .map-title {
+    font-size: clamp(22px, 2.5vw, 28px);
+  }
+  
+  .datetime-text {
+    font-size: clamp(16px, 1.5vw, 18px);
+  }
+  
+  .status-label, .status-value, .status-unit {
+    font-size: clamp(16px, 1.5vw, 18px);
+  }
+  
+  .nav-label {
+    font-size: clamp(14px, 1.3vw, 16px);
+  }
+  
+  .nav-icon {
+    width: clamp(24px, 2vw, 28px);
+    height: clamp(24px, 2vw, 28px);
+  }
+
+  /* Override page */
+  .main-panel {
+    width: min(1000px, 80vw);
+    height: min(680px, 75vh);
+    padding: 28px;
+    border-radius: 45px;
+  }
+  
+  .dashboard-title {
+    font-size: clamp(28px, 3.5vw, 40px);
+  }
+  
+  .camera-feed {
+    padding: 25px;
+  }
+  
+  .camera-header span {
+    font-size: clamp(20px, 2.2vw, 28px);
+  }
+  
+  .status-label {
+    font-size: clamp(18px, 2.2vw, 28px);
+  }
+  
+  .status-value {
+    font-size: clamp(16px, 1.8vw, 22px);
+  }
+  
+  .side-left-group {
+    left: 25px;
+  }
+  
+  .side-right-group {
+    right: 25px;
+  }
+  
+  .side-toggle {
+    width: 150px;
+    padding: 10px 8px;
+  }
+  
+  .side-toggle span {
+    font-size: 18px;
+  }
+  
+  .vertical-slider {
+    height: 500px;
+    width: 70px;
+  }
+  
+  .range-slider.vertical {
+    width: 450px;
+    height: 38px;
+  }
+}
+
+/* Laptops médios (1367-1600px) */
+@media screen and (max-width: 1600px) and (min-width: 1367px) and (orientation: landscape) {
+  /* Override page */
+  .main-panel {
+    width: min(1200px, 82vw);
+    height: min(800px, 78vh);
+    padding: 32px;
+  }
+  
+  .side-left-group {
+    left: 35px;
+  }
+  
+  .side-right-group {
+    right: 35px;
+  }
+  
+  .vertical-slider {
+    height: 550px;
+  }
+}
+
+/* Forçar orientação horizontal */
+@media screen and (orientation: portrait) {
+  body::before {
+    content: "Por favor, rode o dispositivo para horizontal";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #001330;
+    color: #ffce34;
+    padding: 20px;
+    border-radius: 20px;
+    font-size: clamp(18px, 3vw, 24px);
+    text-align: center;
+    z-index: 10000;
+    border: 2px solid #ffce34;
+    max-width: 80vw;
+    box-sizing: border-box;
+  }
+  
+  .dashboard-container {
+    filter: blur(5px);
+    pointer-events: none;
+  }
 }
 
