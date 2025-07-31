@@ -2,6 +2,129 @@
 let isSyncing = false;
 let slideLockActive = false;
 
+// WebSocket configuration
+const SERVER_URL = 'ws://192.168.4.1:8765';
+let websocket = null;
+let isConnected = false;
+let connectionTimeout = null;
+
+// WebSocket functions
+function connectToServer() {
+  console.log('[WebSocket] A tentar conectar a:', SERVER_URL);
+  
+  try {
+    websocket = new WebSocket(SERVER_URL);
+    console.log('[WebSocket] WebSocket criado, estado inicial:', getWebSocketStatusText());
+    
+    // Set connection timeout
+    connectionTimeout = setTimeout(() => {
+      if (websocket.readyState === WebSocket.CONNECTING) {
+        console.error('[WebSocket] Timeout de conexao - Servidor nao respondeu em 5 segundos');
+        console.error('[WebSocket] Verifique se o servidor esta ativo em', SERVER_URL);
+        websocket.close();
+      }
+    }, 5000);
+    
+    websocket.onopen = function(event) {
+      console.log('[WebSocket] Conectado com sucesso a:', SERVER_URL);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      clearTimeout(connectionTimeout);
+      isConnected = true;
+      updateConnectionStatus(true);
+    };
+    
+    websocket.onmessage = function(event) {
+      console.log('[WebSocket] Mensagem recebida:', event.data);
+      try {
+        const data = JSON.parse(event.data);
+        console.log('[WebSocket] Dados analisados:', data);
+        handleServerResponse(data);
+      } catch (error) {
+        console.warn('[WebSocket] Falha ao analisar mensagem como JSON:', event.data);
+      }
+    };
+    
+    websocket.onclose = function(event) {
+      console.log('[WebSocket] Conexao fechada. Codigo:', event.code, 'Razao:', event.reason);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      clearTimeout(connectionTimeout);
+      isConnected = false;
+      updateConnectionStatus(false);
+      
+      // Auto-reconnect after 3 seconds
+      console.log('[WebSocket] A tentar reconectar em 3 segundos...');
+      setTimeout(connectToServer, 3000);
+    };
+    
+    websocket.onerror = function(error) {
+      console.error('[WebSocket] Erro ocorrido:', error);
+      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      console.error('[WebSocket] Detalhes do erro - Verifique se o servidor esta ativo em', SERVER_URL);
+      clearTimeout(connectionTimeout);
+      isConnected = false;
+      updateConnectionStatus(false);
+    };
+    
+  } catch (error) {
+    console.error('[WebSocket] Falha ao criar conexao WebSocket:', error);
+    isConnected = false;
+    updateConnectionStatus(false);
+  }
+}
+
+function sendSpeedCommand(leftValue, rightValue) {
+  const command = {
+    "K": parseInt(leftValue),
+    "Q": parseInt(rightValue)
+  };
+  
+  console.log('[Comando] A preparar envio de comando de velocidade:', command);
+  
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    try {
+      const message = JSON.stringify(command);
+      websocket.send(message);
+      console.log('[Comando] Comando de velocidade enviado com sucesso:', message);
+    } catch (error) {
+      console.error('[Comando] Falha ao enviar comando:', error);
+    }
+  } else {
+    const statusText = getWebSocketStatusText();
+    console.warn('[Comando] Nao e possivel enviar comando - WebSocket nao esta pronto. Estado:', statusText);
+    console.log('[Comando] Comando em fila:', command);
+  }
+}
+
+function getWebSocketStatusText() {
+  if (!websocket) return 'NULL';
+  
+  switch(websocket.readyState) {
+    case WebSocket.CONNECTING:
+      return '0 (CONNECTING - A conectar)';
+    case WebSocket.OPEN:
+      return '1 (OPEN - Conectado)';
+    case WebSocket.CLOSING:
+      return '2 (CLOSING - A fechar)';
+    case WebSocket.CLOSED:
+      return '3 (CLOSED - Fechado)';
+    default:
+      return 'DESCONHECIDO';
+  }
+}
+
+function handleServerResponse(data) {
+  console.log('[Resposta] A processar resposta do servidor:', data);
+  // Add response handling logic here if needed
+}
+
+function updateConnectionStatus(connected) {
+  const status = connected ? 'CONECTADO' : 'DESCONECTADO';
+  console.log('[Estado] Estado da conexao:', status);
+  
+  // You can add visual indicators here later
+  // For now, just console logging
+}
+
 // Função para  snap magnético
 function applyMagneticSnap(slider, snapValue = 50, snapRange = 5) {
   const value = parseInt(slider.value, 10);
@@ -32,12 +155,15 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
     }
   }
   
+  // Send speed command in real-time
   const leftSlider = document.getElementById('left-range-slider');
   const rightSlider = document.getElementById('right-range-slider');
   if (leftSlider && rightSlider) {
-    console.log(`Left: ${leftSlider.value} | Right: ${rightSlider.value}`);
+    console.log('[Sliders] Esquerda:', leftSlider.value, '| Direita:', rightSlider.value);
+    sendSpeedCommand(leftSlider.value, rightSlider.value);
+    
     if (slideLockActive && leftSlider.value !== rightSlider.value) {
-      console.warn('Slide Lock está ativo, mas os valores não estão iguais!');
+      console.warn('[Sliders] Slide Lock esta ativo, mas os valores nao estao iguais!');
     }
   }
   
@@ -47,6 +173,12 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+  console.log('[Inicializacao] A inicializar dashboard...');
+  
+  // Initialize WebSocket connection
+  console.log('[Inicializacao] A iniciar conexao WebSocket...');
+  connectToServer();
+  
   const leftSlider = document.getElementById('left-range-slider');
 
   // Navigation functionality for main dashboard
@@ -169,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         leftSlider.addEventListener('input', function () {
+            console.log('[Slider] Slider esquerdo alterado para:', leftSlider.value);
             if (isSyncing) return;
             if (slideLockActive) {
                 isSyncing = true;
@@ -179,9 +312,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 10);
             }
+            // Send real-time command
+            const rightValue = document.getElementById('right-range-slider').value;
+            sendSpeedCommand(leftSlider.value, rightValue);
         });
         
         rightSlider.addEventListener('input', function () {
+            console.log('[Slider] Slider direito alterado para:', rightSlider.value);
             if (isSyncing) return;
             if (slideLockActive) {
                 isSyncing = true;
@@ -192,6 +329,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 10);
             }
+            // Send real-time command
+            const leftValue = document.getElementById('left-range-slider').value;
+            sendSpeedCommand(leftValue, rightSlider.value);
         });
     }
 
@@ -211,8 +351,22 @@ document.addEventListener('DOMContentLoaded', function () {
             thumb.style.height = '39px';
             thumb.style.top = (trackHeight * (1 - percent)) + 'px';
         }
+        slider.addEventListener('input', function() {
+            updateThumb();
+            // Send real-time command when any slider changes
+            const leftSlider = document.getElementById('left-range-slider');
+            const rightSlider = document.getElementById('right-range-slider');
+            if (leftSlider && rightSlider) {
+                console.log('[Slider] Slider vertical alterado, a enviar comando...');
+                sendSpeedCommand(leftSlider.value, rightSlider.value);
+            }
+        });
         slider.addEventListener('input', updateThumb);
         window.addEventListener('resize', updateThumb);
         updateThumb();
     });
+    
+    console.log('[Inicializacao] Inicializacao do dashboard completa!');
+    console.log('[Inicializacao] URL WebSocket:', SERVER_URL);
+    console.log('[Inicializacao] Sliders configurados para controlo em tempo real');
 });

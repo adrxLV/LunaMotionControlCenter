@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const configsBtn = document.getElementById('configs-btn');
   
   if (overrideBtn) {
-    overrideBtn.addEventListener('click', function() {
+    overrideBtn.  addEventListener('click', function() {
       window.location.href = 'override.html';
     });
   }
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (satellitesBtn) {
     satellitesBtn.addEventListener('click', function() {
-      alert('Satellites functionality - Coming Soon');
+      showSatellitePopup();
     });
   }
   
@@ -41,15 +41,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateDateTime() {
     const now = new Date();
     const dateTimeElements = document.querySelectorAll('.datetime-text');
+    
+    // Get local timezone offset
+    const timezoneOffset = now.getTimezoneOffset();
+    const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
+    const offsetMinutes = Math.abs(timezoneOffset % 60);
+    const offsetSign = timezoneOffset <= 0 ? '+' : '-';
+    const timezoneString = `GMT${offsetSign}${offsetHours.toString().padStart(2, '0')}${offsetMinutes > 0 ? ':' + offsetMinutes.toString().padStart(2, '0') : ''}`;
+    
     const formattedDateTime = `DATE: ${now.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     })} | ${now.toLocaleTimeString('en-GB', {
       hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'GMT'
-    })} GMT+0`;
+      minute: '2-digit'
+    })} ${timezoneString}`;
     
     dateTimeElements.forEach(element => {
       element.textContent = formattedDateTime;
@@ -158,4 +165,46 @@ document.addEventListener('DOMContentLoaded', function() {
       this.style.transform = 'translateY(-2px)';
     });
   });
+
+  // Satellite popup functionality
+  function showSatellitePopup() {
+    const popup = document.getElementById('satellite-popup');
+    const overlay = createOverlay();
+    
+    document.body.appendChild(overlay);
+    
+    // Show popup with animation
+    setTimeout(() => {
+      popup.classList.add('show');
+      overlay.classList.add('show');
+    }, 10);
+    
+    // Close button functionality
+    const closeBtn = document.getElementById('satellite-popup-close');
+    closeBtn.addEventListener('click', closeSatellitePopup);
+    
+    // Close on overlay click
+    overlay.addEventListener('click', closeSatellitePopup);
+  }
+
+  function closeSatellitePopup() {
+    const popup = document.getElementById('satellite-popup');
+    const overlay = document.querySelector('.popup-overlay');
+    
+    popup.classList.remove('show');
+    overlay.classList.remove('show');
+    
+    // Remove overlay after animation
+    setTimeout(() => {
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    }, 400);
+  }
+
+  function createOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    return overlay;
+  }
 });
