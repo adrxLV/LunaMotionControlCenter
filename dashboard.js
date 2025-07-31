@@ -8,91 +8,134 @@ let websocket = null;
 let isConnected = false;
 let connectionTimeout = null;
 
+// Command sending configuration
+let lastCommand = null;
+let commandInterval = null;
+let lastSentCommand = null; // Track last sent command to avoid duplicates
+let debounceTimeout = null; // For debouncing slider input
+let headLampState = false; // Track headlamp state
+const COMMAND_INTERVAL_MS = 1500; // Send command every 1.5 seconds
+const DEBOUNCE_MS = 50; // Debounce slider input
+
 // WebSocket functions
 function connectToServer() {
-  console.log('[WebSocket] A tentar conectar a:', SERVER_URL);
+  console.log('[WebSocket] Conectando ao servidor:', SERVER_URL);
   
   try {
     websocket = new WebSocket(SERVER_URL);
-    console.log('[WebSocket] WebSocket criado, estado inicial:', getWebSocketStatusText());
     
     // Set connection timeout
     connectionTimeout = setTimeout(() => {
       if (websocket.readyState === WebSocket.CONNECTING) {
-        console.error('[WebSocket] Timeout de conexao - Servidor nao respondeu em 5 segundos');
-        console.error('[WebSocket] Verifique se o servidor esta ativo em', SERVER_URL);
+        console.error('[WebSocket] Timeout - Servidor nao respondeu');
         websocket.close();
       }
     }, 5000);
     
     websocket.onopen = function(event) {
-      console.log('[WebSocket] Conectado com sucesso a:', SERVER_URL);
-      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      console.log('[WebSocket] Conectado com sucesso');
       clearTimeout(connectionTimeout);
       isConnected = true;
       updateConnectionStatus(true);
     };
     
     websocket.onmessage = function(event) {
-      console.log('[WebSocket] Mensagem recebida:', event.data);
       try {
         const data = JSON.parse(event.data);
-        console.log('[WebSocket] Dados analisados:', data);
         handleServerResponse(data);
       } catch (error) {
-        console.warn('[WebSocket] Falha ao analisar mensagem como JSON:', event.data);
+        console.warn('[WebSocket] Erro ao analisar mensagem:', event.data);
       }
     };
     
     websocket.onclose = function(event) {
-      console.log('[WebSocket] Conexao fechada. Codigo:', event.code, 'Razao:', event.reason);
-      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
+      console.log('[WebSocket] Conexao fechada - Codigo:', event.code);
       clearTimeout(connectionTimeout);
       isConnected = false;
       updateConnectionStatus(false);
       
       // Auto-reconnect after 3 seconds
-      console.log('[WebSocket] A tentar reconectar em 3 segundos...');
       setTimeout(connectToServer, 3000);
     };
     
     websocket.onerror = function(error) {
-      console.error('[WebSocket] Erro ocorrido:', error);
-      console.log('[WebSocket] Estado da conexao:', getWebSocketStatusText());
-      console.error('[WebSocket] Detalhes do erro - Verifique se o servidor esta ativo em', SERVER_URL);
+      console.error('[WebSocket] Erro - Verifique se o servidor esta ativo');
       clearTimeout(connectionTimeout);
       isConnected = false;
       updateConnectionStatus(false);
     };
     
   } catch (error) {
-    console.error('[WebSocket] Falha ao criar conexao WebSocket:', error);
+    console.error('[WebSocket] Falha ao criar conexao WebSocket');
     isConnected = false;
     updateConnectionStatus(false);
   }
 }
 
+function sendSpeedCommandDebounced(leftValue, rightValue) {
+  // Clear any existing debounce timeout
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout);
+  }
+  
+  // Set new debounce timeout
+  debounceTimeout = setTimeout(() => {
+    const leftVal = parseInt(leftValue);
+    const rightVal = parseInt(rightValue);
+    
+    // Send command immediately when slider changes
+    sendSpeedCommand(leftVal, rightVal);
+  }, DEBOUNCE_MS);
+}
+
 function sendSpeedCommand(leftValue, rightValue) {
   const command = {
     "K": parseInt(leftValue),
-    "Q": parseInt(rightValue)
+    "Q": parseInt(rightValue),
+    "D": 90,
+    "M": headLampState
   };
   
-  console.log('[Comando] A preparar envio de comando de velocidade:', command);
+  // Always store the command for continuous sending
+  lastCommand = command;
   
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     try {
       const message = JSON.stringify(command);
       websocket.send(message);
-      console.log('[Comando] Comando de velocidade enviado com sucesso:', message);
+      lastSentCommand = { ...command }; // Track what was actually sent
+      console.log('[Comando] Enviado:', message);
     } catch (error) {
       console.error('[Comando] Falha ao enviar comando:', error);
     }
   } else {
-    const statusText = getWebSocketStatusText();
-    console.warn('[Comando] Nao e possivel enviar comando - WebSocket nao esta pronto. Estado:', statusText);
-    console.log('[Comando] Comando em fila:', command);
+    console.warn('[Comando] WebSocket nao esta pronto - Comando ignorado');
   }
+}
+
+function startCommandInterval() {
+  // Clear any existing interval
+  if (commandInterval) {
+    clearInterval(commandInterval);
+  }
+  
+  // Start sending commands every 1.5 seconds regardless of values
+  commandInterval = setInterval(() => {
+    if (lastCommand) {
+      // Always send the last command to maintain connection
+      sendSpeedCommand(lastCommand.K, lastCommand.Q);
+    }
+  }, COMMAND_INTERVAL_MS);
+}
+
+function stopCommandInterval() {
+  if (commandInterval) {
+    clearInterval(commandInterval);
+    commandInterval = null;
+  }
+  // Send final stop command
+  sendSpeedCommand(0, 0);
+  lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
 }
 
 function getWebSocketStatusText() {
@@ -113,30 +156,27 @@ function getWebSocketStatusText() {
 }
 
 function handleServerResponse(data) {
-  console.log('[Resposta] A processar resposta do servidor:', data);
-  // Add response handling logic here if needed
+  // Process server response silently
 }
 
 function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
-  console.log('[Estado] Estado da conexao:', status);
-  
-  // You can add visual indicators here later
-  // For now, just console logging
+  // Visual indicators can be added here later
 }
 
-// Função para  snap magnético
-function applyMagneticSnap(slider, snapValue = 50, snapRange = 5) {
+// Função para snap magnético
+function applyMagneticSnap(slider, snapValue = 0, snapRange = 8) {
   const value = parseInt(slider.value, 10);
   if (Math.abs(value - snapValue) <= snapRange && value !== snapValue) {
     slider.value = snapValue;
     slider.classList.add('snap-effect');
-    setTimeout(() => slider.classList.remove('snap-effect'), 150);
+    setTimeout(() => slider.classList.remove('snap-effect'), 100);
     return true; 
   }
   return false;
 }
-function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10) {
+
+function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
   if (isSyncing) return;
   
   isSyncing = true;
@@ -151,7 +191,7 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
     
     if (snapApplied) {
       targetSlider.classList.add('snap-effect');
-      setTimeout(() => targetSlider.classList.remove('snap-effect'), 150);
+      setTimeout(() => targetSlider.classList.remove('snap-effect'), 100);
     }
   }
   
@@ -159,25 +199,24 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 50, snapRange = 10)
   const leftSlider = document.getElementById('left-range-slider');
   const rightSlider = document.getElementById('right-range-slider');
   if (leftSlider && rightSlider) {
-    console.log('[Sliders] Esquerda:', leftSlider.value, '| Direita:', rightSlider.value);
-    sendSpeedCommand(leftSlider.value, rightSlider.value);
+    const leftVal = parseInt(leftSlider.value);
+    const rightVal = parseInt(rightSlider.value);
     
-    if (slideLockActive && leftSlider.value !== rightSlider.value) {
-      console.warn('[Sliders] Slide Lock esta ativo, mas os valores nao estao iguais!');
-    }
+    sendSpeedCommandDebounced(leftVal, rightVal);
   }
   
   setTimeout(() => {
     isSyncing = false;
-  }, 50);
+  }, 20);
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  console.log('[Inicializacao] A inicializar dashboard...');
-  
   // Initialize WebSocket connection
-  console.log('[Inicializacao] A iniciar conexao WebSocket...');
   connectToServer();
+  
+  // Start continuous command sending immediately
+  lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
+  startCommandInterval();
   
   const leftSlider = document.getElementById('left-range-slider');
 
@@ -262,6 +301,20 @@ window.addEventListener('DOMContentLoaded', function() {
       syncSliders(rightSlider, leftSlider);
     });
   }
+  
+  // Add event listeners to stop rover when page is closed or unloaded
+  window.addEventListener('beforeunload', function() {
+    stopCommandInterval();
+  });
+  
+  window.addEventListener('unload', function() {
+    stopCommandInterval();
+  });
+  
+  // Stop rover if user navigates away
+  window.addEventListener('pagehide', function() {
+    stopCommandInterval();
+  });
 });
 // JavaScript para controlar switches e sliders na dashboard
 
@@ -275,6 +328,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         sw.addEventListener('click', function () {
             sw.classList.toggle('active');
+            
+            // Handle HeadLamp switch specifically
+            if (sw.id === 'headlamp-switch') {
+                headLampState = sw.classList.contains('active');
+                console.log('[HeadLamp] Estado alterado para:', headLampState);
+                
+                // Send command immediately when headlamp changes
+                if (lastCommand) {
+                    sendSpeedCommand(lastCommand.K, lastCommand.Q);
+                }
+            }
         });
     });
 
@@ -296,12 +360,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 rightSlider.dispatchEvent(updateEvent);
                 setTimeout(() => {
                     isSyncing = false;
-                }, 50);
+                }, 20);
             }
         });
 
         leftSlider.addEventListener('input', function () {
-            console.log('[Slider] Slider esquerdo alterado para:', leftSlider.value);
             if (isSyncing) return;
             if (slideLockActive) {
                 isSyncing = true;
@@ -310,15 +373,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 rightSlider.dispatchEvent(event);
                 setTimeout(() => {
                     isSyncing = false;
-                }, 10);
+                }, 5);
             }
-            // Send real-time command
-            const rightValue = document.getElementById('right-range-slider').value;
-            sendSpeedCommand(leftSlider.value, rightValue);
+            // Use debounced command sending
+            const rightValue = parseInt(document.getElementById('right-range-slider').value);
+            const leftValue = parseInt(leftSlider.value);
+            
+            sendSpeedCommandDebounced(leftValue, rightValue);
         });
         
         rightSlider.addEventListener('input', function () {
-            console.log('[Slider] Slider direito alterado para:', rightSlider.value);
             if (isSyncing) return;
             if (slideLockActive) {
                 isSyncing = true;
@@ -327,11 +391,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 leftSlider.dispatchEvent(event);
                 setTimeout(() => {
                     isSyncing = false;
-                }, 10);
+                }, 5);
             }
-            // Send real-time command
-            const leftValue = document.getElementById('left-range-slider').value;
-            sendSpeedCommand(leftValue, rightSlider.value);
+            // Use debounced command sending
+            const leftValue = parseInt(document.getElementById('left-range-slider').value);
+            const rightValue = parseInt(rightSlider.value);
+            
+            sendSpeedCommandDebounced(leftValue, rightValue);
         });
     }
 
@@ -353,12 +419,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         slider.addEventListener('input', function() {
             updateThumb();
-            // Send real-time command when any slider changes
+            // Use debounced command sending for slider changes
             const leftSlider = document.getElementById('left-range-slider');
             const rightSlider = document.getElementById('right-range-slider');
             if (leftSlider && rightSlider) {
-                console.log('[Slider] Slider vertical alterado, a enviar comando...');
-                sendSpeedCommand(leftSlider.value, rightSlider.value);
+                const leftValue = parseInt(leftSlider.value);
+                const rightValue = parseInt(rightSlider.value);
+                
+                sendSpeedCommandDebounced(leftValue, rightValue);
             }
         });
         slider.addEventListener('input', updateThumb);
@@ -366,7 +434,5 @@ document.addEventListener('DOMContentLoaded', function () {
         updateThumb();
     });
     
-    console.log('[Inicializacao] Inicializacao do dashboard completa!');
-    console.log('[Inicializacao] URL WebSocket:', SERVER_URL);
-    console.log('[Inicializacao] Sliders configurados para controlo em tempo real');
+    // Initialization complete
 });
