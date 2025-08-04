@@ -10,14 +10,14 @@ let connectionTimeout = null;
 // Command sending configuration
 let lastCommand = null;
 let commandInterval = null;
-let lastSentCommand = null; // Track last sent command to avoid duplicates
-let debounceTimeout = null; // For debouncing slider input
-let headLampState = false; // Track headlamp state
-let stopModeActive = false; // Track stop mode state
-let lastSpeedMultiplier = null; // Track speed changes for immediate sending
-const COMMAND_INTERVAL_MS = 1500; // Send command every 1.5 seconds
-const DEBOUNCE_MS = 50; // Debounce slider input
-const COMMAND_CHANGE_THRESHOLD = 25; // Send command only if change is >= 25%
+let lastSentCommand = null;
+let debounceTimeout = null;
+let headLampState = false; 
+let stopModeActive = false; 
+let lastSpeedMultiplier = null; 
+const COMMAND_INTERVAL_MS = 1500; 
+const DEBOUNCE_MS = 50; 
+const COMMAND_CHANGE_THRESHOLD = 25; 
 
 // WebSocket functions
 function connectToServer() {
@@ -75,23 +75,19 @@ function connectToServer() {
 }
 
 function sendSpeedCommandDebounced(leftValue, rightValue) {
-  // Clear any existing debounce timeout
   if (debounceTimeout) {
     clearTimeout(debounceTimeout);
   }
   
-  // Set new debounce timeout
   debounceTimeout = setTimeout(() => {
     const leftVal = parseInt(leftValue);
     const rightVal = parseInt(rightValue);
     
-    // Send command with intelligent throttling (not forced immediate for gamepad/joystick)
     sendSpeedCommand(leftVal, rightVal, false);
   }, DEBOUNCE_MS);
 }
 
 function sendSpeedCommand(leftValue, rightValue, forceImmediate = false) {
-  // If stop mode is active, override values to 0
   if (stopModeActive) {
     leftValue = 0;
     rightValue = 0;
@@ -101,19 +97,16 @@ function sendSpeedCommand(leftValue, rightValue, forceImmediate = false) {
     "K": parseInt(leftValue),
     "Q": parseInt(rightValue),
     "D": 90,
-    "M": stopModeActive ? false : headLampState // Turn off headlamp in stop mode
+    "M": stopModeActive ? false : headLampState
   };
   
-  // Always store the command for continuous sending
   lastCommand = command;
   
-  // Check if we should send this command immediately
   const shouldSendImmediate = forceImmediate || 
                               hasSignificantChange(command.K, command.Q) || 
                               hasStateChange(command);
   
   if (!shouldSendImmediate) {
-    // Don't send if change is not significant enough
     commandsSkipped++;
     console.log(`[Comando] Mudança insignificante - K: ${command.K}, Q: ${command.Q} (threshold: ${COMMAND_CHANGE_THRESHOLD}%)`);
     return;
@@ -135,16 +128,12 @@ function sendSpeedCommand(leftValue, rightValue, forceImmediate = false) {
 }
 
 function startCommandInterval() {
-  // Clear any existing interval
   if (commandInterval) {
     clearInterval(commandInterval);
   }
   
-  // Start sending commands every 1.5 seconds regardless of values
-  // This loop always forces sending to maintain connection
   commandInterval = setInterval(() => {
     if (lastCommand) {
-      // Always send the last command to maintain connection (force immediate)
       sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
     }
   }, COMMAND_INTERVAL_MS);
@@ -155,7 +144,6 @@ function stopCommandInterval() {
     clearInterval(commandInterval);
     commandInterval = null;
   }
-  // Send final stop command (force immediate)
   sendSpeedCommand(0, 0, true);
   lastCommand = { K: 0, Q: 0, D: 90, M: stopModeActive ? false : headLampState };
 }
@@ -178,12 +166,7 @@ function getWebSocketStatusText() {
 }
 
 function handleServerResponse(data) {
-  // Process sensor data from rover
-  // Format: {"BV":7.58,"N":0,"P":0,"O":42.58,"J":0}
-  // O = Ultrasonic, N = Left IR, P = Right IR
-  
   if (data.hasOwnProperty('O')) {
-    // Update Ultrasonic sensor value
     const ultrasonicElement = document.getElementById('ultrasonic-value');
     if (ultrasonicElement) {
       ultrasonicElement.textContent = data.O.toFixed(1) + ' cm';
@@ -191,7 +174,6 @@ function handleServerResponse(data) {
   }
   
   if (data.hasOwnProperty('N')) {
-    // Update Left IR sensor value
     const leftIRElement = document.getElementById('left-ir-value');
     if (leftIRElement) {
       leftIRElement.textContent = data.N;
@@ -199,47 +181,40 @@ function handleServerResponse(data) {
   }
   
   if (data.hasOwnProperty('P')) {
-    // Update Right IR sensor value
     const rightIRElement = document.getElementById('right-ir-value');
     if (rightIRElement) {
       rightIRElement.textContent = data.P;
     }
   }
   
-  // Log received data for debugging
   console.log('[WebSocket] Dados recebidos:', data);
 }
 
 function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
-  // Visual indicators can be added here later
 }
 
-// Function to check if command has changed significantly
 function hasSignificantChange(newLeftValue, newRightValue) {
-  if (!lastSentCommand) return true; // Send first command always
+  if (!lastSentCommand) return true;
   
   const leftDiff = Math.abs(newLeftValue - lastSentCommand.K);
   const rightDiff = Math.abs(newRightValue - lastSentCommand.Q);
   
-  // Check if either motor has changed by the threshold amount
   return leftDiff >= COMMAND_CHANGE_THRESHOLD || rightDiff >= COMMAND_CHANGE_THRESHOLD;
 }
 
-// Function to check if stop mode or headlamp state changed
 function hasStateChange(newCommand) {
   if (!lastSentCommand) return true;
   return lastSentCommand.M !== newCommand.M;
 }
 
-// Function to check if speed multiplier has changed (for immediate sending)
 function hasSpeedChange(currentSpeedMultiplier) {
   if (lastSpeedMultiplier === null) {
     lastSpeedMultiplier = currentSpeedMultiplier;
-    return false; // Don't trigger on first initialization
+    return false;
   }
   
-  const speedChanged = Math.abs(currentSpeedMultiplier - lastSpeedMultiplier) > 0.01; // 1% change threshold
+  const speedChanged = Math.abs(currentSpeedMultiplier - lastSpeedMultiplier) > 0.01;
   if (speedChanged) {
     lastSpeedMultiplier = currentSpeedMultiplier;
     return true;
@@ -247,12 +222,9 @@ function hasSpeedChange(currentSpeedMultiplier) {
   return false;
 }
 
-// Function to send speed command with speed multiplier consideration
 function sendSpeedCommandWithSpeed(leftValue, rightValue, speedMultiplier, forceImmediate = false) {
-  // Check if speed has changed significantly
   const speedChanged = hasSpeedChange(speedMultiplier);
   
-  // Force immediate if speed changed
   return sendSpeedCommand(leftValue, rightValue, forceImmediate || speedChanged);
 }
 
@@ -279,9 +251,9 @@ setInterval(() => {
     commandsSent = 0;
     commandsSkipped = 0;
   }
-}, 10000); // Log every 10 seconds
+}, 10000);
 
-// Função para snap magnético
+// Slider functions
 function applyMagneticSnap(slider, snapValue = 0, snapRange = 8) {
   const value = parseInt(slider.value, 10);
   if (Math.abs(value - snapValue) <= snapRange && value !== snapValue) {
@@ -302,7 +274,6 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
   
   if (slideLockActive && targetSlider) {
     targetSlider.value = sourceSlider.value;
-    // Atualiza a UI 
     const event = new Event('input', { bubbles: true });
     targetSlider.dispatchEvent(event);
     
@@ -312,7 +283,6 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
     }
   }
   
-  // Send speed command in real-time
   const leftSlider = document.getElementById('left-range-slider');
   const rightSlider = document.getElementById('right-range-slider');
   if (leftSlider && rightSlider) {
@@ -328,16 +298,13 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  // Initialize WebSocket connection
   connectToServer();
   
-  // Start continuous command sending immediately
   lastCommand = { K: 0, Q: 0, D: 90, M: stopModeActive ? false : headLampState };
   startCommandInterval();
   
   const leftSlider = document.getElementById('left-range-slider');
 
-  // Navigation functionality for main dashboard
   const overrideBtn = document.getElementById('override-btn');
   
   if (overrideBtn) {
@@ -346,7 +313,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Update current date and time
   function updateDateTime() {
     const now = new Date();
     const options = {
@@ -374,12 +340,9 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Initialize datetime update
   updateDateTime();
   setInterval(updateDateTime, 1000);
   
-  // Note: Sensor values (IR and Ultrasonic) are now updated only via WebSocket data
-  // No more simulated random values
   const rightSlider = document.getElementById('right-range-slider');
   
   if (leftSlider && rightSlider) {
@@ -392,7 +355,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Add event listeners to stop rover when page is closed or unloaded
   window.addEventListener('beforeunload', function() {
     stopCommandInterval();
   });
@@ -401,13 +363,12 @@ window.addEventListener('DOMContentLoaded', function() {
     stopCommandInterval();
   });
   
-  // Stop rover if user navigates away
   window.addEventListener('pagehide', function() {
     stopCommandInterval();
   });
 });
 
-// JavaScript para controlar switches e sliders na dashboard
+// UI Controls
 document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.switch').forEach(function (sw) {
@@ -419,29 +380,24 @@ document.addEventListener('DOMContentLoaded', function () {
         sw.addEventListener('click', function () {
             sw.classList.toggle('active');
             
-            // Handle HeadLamp switch specifically
             if (sw.id === 'headlamp-switch') {
                 headLampState = sw.classList.contains('active');
                 console.log('[HeadLamp] Estado alterado para:', headLampState);
                 
-                // Send command immediately when headlamp changes (force immediate)
                 if (lastCommand) {
                     sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
                 }
             }
             
-            // Handle Stop Mode switch specifically
             if (sw.id === 'stop-mode-switch') {
                 stopModeActive = sw.classList.contains('active');
                 console.log('[Stop Mode] Estado alterado para:', stopModeActive);
                 
-                // Send command immediately when stop mode changes (force immediate)
                 if (lastCommand) {
                     sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
                 }
             }
             
-            // Handle Joystick Mode switch
             if (sw.id === 'joystick-mode-switch') {
                 if (sw.classList.contains('active')) {
                     console.log('[UI] Mudando para modo Joystick');
@@ -484,7 +440,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
-            // Use debounced command sending
             const rightValue = parseInt(document.getElementById('right-range-slider').value);
             const leftValue = parseInt(leftSlider.value);
             
@@ -502,7 +457,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
-            // Use debounced command sending
             const leftValue = parseInt(document.getElementById('left-range-slider').value);
             const rightValue = parseInt(rightSlider.value);
             
@@ -528,7 +482,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         slider.addEventListener('input', function() {
             updateThumb();
-            // Use debounced command sending for slider changes
             const leftSlider = document.getElementById('left-range-slider');
             const rightSlider = document.getElementById('right-range-slider');
             if (leftSlider && rightSlider) {
@@ -542,10 +495,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('resize', updateThumb);
         updateThumb();
     });
-    
-    // Initialization complete
 });
 
-// Export functions globally for other scripts
+// Export functions
 window.sendSpeedCommandWithSpeed = sendSpeedCommandWithSpeed;
 window.getCommandStats = getCommandStats;

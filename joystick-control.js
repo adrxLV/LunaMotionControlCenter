@@ -1,7 +1,7 @@
 // Joystick Control System
 let joystickActive = false;
 let joystickPosition = { x: 0, y: 0 };
-let speedMultiplier = 0.5; // 50% initial speed
+let speedMultiplier = 0.5;
 let isDragging = false;
 
 // Gamepad control
@@ -9,11 +9,11 @@ let gamepadActive = false;
 let gamepadIndex = -1;
 
 // Joystick configuration
-const JOYSTICK_RADIUS = 70; // Maximum distance from center
-const DEAD_ZONE = 10; // Dead zone radius in pixels
-const GAMEPAD_DEAD_ZONE = 0.15; // Dead zone for gamepad analog sticks
+const JOYSTICK_RADIUS = 70;
+const DEAD_ZONE = 10;
+const GAMEPAD_DEAD_ZONE = 0.15;
 
-// Direction zones for command discretization
+// Direction zones
 const DIRECTION_ZONES = {
     STOP: 'stop',
     FORWARD: 'forward',
@@ -26,11 +26,10 @@ const DIRECTION_ZONES = {
     TURN_RIGHT: 'turn_right'
 };
 
-// Track last sent direction zone to avoid redundant commands
 let lastDirectionZone = null;
 let lastZoneCommand = null;
 
-// Initialize joystick control
+// Joystick functions
 function initializeJoystick() {
     const joystickKnob = document.getElementById('joystick-knob');
     const joystickBase = document.querySelector('.joystick-base');
@@ -38,7 +37,6 @@ function initializeJoystick() {
     
     if (!joystickKnob || !joystickBase || !speedSlider) return;
     
-    // Speed slider event
     speedSlider.addEventListener('input', function() {
         const newSpeedMultiplier = parseInt(this.value) / 100;
         const speedChanged = Math.abs(newSpeedMultiplier - speedMultiplier) > 0.01;
@@ -46,7 +44,6 @@ function initializeJoystick() {
         speedMultiplier = newSpeedMultiplier;
         updateSpeedDisplay();
         
-        // If speed changed, force immediate update
         if (speedChanged) {
             console.log(`[Joystick] Speed changed to ${Math.round(speedMultiplier * 100)}% - forcing immediate command`);
             // Force immediate command send
