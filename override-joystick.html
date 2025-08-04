@@ -5,297 +5,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rover Dashboard - Joystick Control</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Joystick Styles */
-    .joystick-container {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 20px auto;
-    }
-
-    .joystick-base {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-      border: 3px solid #00d4ff;
-      position: relative;
-      box-shadow: 
-        inset 0 0 20px rgba(0, 212, 255, 0.1),
-        0 0 30px rgba(0, 212, 255, 0.2);
-    }
-
-    .joystick-knob {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #00d4ff, #0099cc);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      transition: all 0.1s ease;
-      box-shadow: 
-        0 4px 15px rgba(0, 212, 255, 0.4),
-        inset 0 2px 10px rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .joystick-knob:hover {
-      transform: translate(-50%, -50%) scale(1.1);
-      box-shadow: 
-        0 6px 20px rgba(0, 212, 255, 0.6),
-        inset 0 2px 10px rgba(255, 255, 255, 0.3);
-    }
-
-    .joystick-knob.active {
-      transform: translate(-50%, -50%) scale(0.95);
-      box-shadow: 
-        0 2px 10px rgba(0, 212, 255, 0.8),
-        inset 0 2px 5px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Speed Slider Styles */
-    .speed-control {
-      margin: 30px 20px;
-      text-align: center;
-    }
-
-    .speed-label {
-      color: #00d4ff;
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      display: block;
-    }
-
-    .speed-slider-container {
-      position: relative;
-      width: 100%;
-      height: 40px;
-      background: linear-gradient(90deg, #1a1a1a, #2d2d2d);
-      border-radius: 20px;
-      border: 2px solid #00d4ff;
-      overflow: hidden;
-    }
-
-    .speed-slider {
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      outline: none;
-      border: none;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .speed-slider::-webkit-slider-thumb {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #00d4ff, #0099cc);
-      cursor: pointer;
-      -webkit-appearance: none;
-      box-shadow: 0 2px 10px rgba(0, 212, 255, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .speed-slider::-moz-range-thumb {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #00d4ff, #0099cc);
-      cursor: pointer;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .speed-indicator {
-      position: absolute;
-      bottom: -25px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #888;
-    }
-
-    /* Control Values Display */
-    .control-values {
-      background: rgba(0, 212, 255, 0.1);
-      border: 1px solid #00d4ff;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 20px;
-      text-align: center;
-    }
-
-    .control-values h3 {
-      color: #00d4ff;
-      margin: 0 0 10px 0;
-      font-size: 16px;
-    }
-
-    .value-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 5px 0;
-      font-size: 14px;
-    }
-
-    .value-label {
-      color: #ccc;
-    }
-
-    .value-number {
-      color: #00d4ff;
-      font-weight: bold;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .joystick-container {
-        width: 150px;
-        height: 150px;
-      }
-
-      .joystick-base {
-        width: 150px;
-        height: 150px;
-      }
-
-      .joystick-knob {
-        width: 45px;
-        height: 45px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style-unified.css">
 </head>
 
-<body>
-  <div class="dashboard-container">
+<body class="joystick-mode">
+  <!-- Full Screen Camera Background -->
+  <div class="camera-background">
+    <img src="http://192.168.4.1:9000/mjpg" alt="Rover Camera Stream" class="fullscreen-camera">
+  </div>
 
-    <!-- Side Left: Control Modes -->
-    <div class="side-left-group">
-      <div class="slider-vertical-group">
-        <div class="side-toggle left-toggle">
-          <span>Avoid O.</span>
-          <div class="switch" id="avoid-switch"></div>
-        </div>
-        <div class="side-toggle left-toggle">
-          <span>Follow O.</span>
-          <div class="switch" id="follow-switch"></div>
-        </div>
-        <div class="side-toggle left-toggle">
-          <span>Auto Mode</span>
-          <div class="switch" id="auto-switch"></div>
-        </div>
-      </div>
+  <div class="joystick-dashboard-container">
+    <!-- Title Overlay -->
+    <div class="joystick-title-overlay">
+      <h1 class="joystick-mode-title">Control | Joystick Mode</h1>
     </div>
 
-    <!-- Main Dashboard Panel -->
-    <div class="main-panel">
-      <h1 class="dashboard-title">Control | Joystick Mode</h1>
-
-      <!-- Camera Feed -->
-      <div class="camera-feed">
-        <div class="camera-header">
-          <span>Rover Camera</span>
-          <img src="/ASSETS/maximize-svgrepo-com 1.svg" alt="Maximize" class="maximize-icon">
-        </div>
-        <img src="http://192.168.4.1:9000/mjpg" alt="Rover Camera Stream" class="camera-stream">
-      </div>
-
-      <!-- Joystick Control -->
+    <!-- Left Side: Joystick Control -->
+    <div class="joystick-left-panel">
       <div class="joystick-container">
         <div class="joystick-base">
           <div class="joystick-knob" id="joystick-knob"></div>
         </div>
       </div>
-
-      <!-- Speed Control -->
-      <div class="speed-control">
-        <label class="speed-label">Speed Control</label>
-        <div class="speed-slider-container">
-          <input type="range" min="0" max="100" value="50" class="speed-slider" id="speed-slider">
-          <div class="speed-indicator">
-            <span>0%</span>
-            <span>25%</span>
-            <span>50%</span>
-            <span>75%</span>
-            <span>100%</span>
-          </div>
+      
+      <!-- Control Modes -->
+      <div class="joystick-controls">
+        <div class="side-toggle joystick-toggle">
+          <span>Avoid O.</span>
+          <div class="switch" id="avoid-switch"></div>
         </div>
-      </div>
-
-      <!-- Control Values Display -->
-      <div class="control-values">
-        <h3>Control Values</h3>
-        <div class="value-row">
-          <span class="value-label">Left Motor:</span>
-          <span class="value-number" id="left-motor-value">0</span>
+        <div class="side-toggle joystick-toggle">
+          <span>Follow O.</span>
+          <div class="switch" id="follow-switch"></div>
         </div>
-        <div class="value-row">
-          <span class="value-label">Right Motor:</span>
-          <span class="value-number" id="right-motor-value">0</span>
-        </div>
-        <div class="value-row">
-          <span class="value-label">Speed:</span>
-          <span class="value-number" id="speed-value">50%</span>
-        </div>
-        <div class="value-row">
-          <span class="value-label">Direction:</span>
-          <span class="value-number" id="direction-value">Center</span>
-        </div>
-      </div>
-
-      <!-- Status and Control Panel -->
-      <div class="status-controls">
-        <div class="control-switch">
-          <span>E-Stop</span>
-          <div class="switch" id="stop-switch"></div>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Left IR</span>
-          <span class="status-value" id="left-ir-value">0</span>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Ultrasonic</span>
-          <span class="status-value" id="ultrasonic-value">0 cm</span>
-        </div>
-
-        <div class="status-box">
-          <span class="status-label">Right IR</span>
-          <span class="status-value" id="right-ir-value">0</span>
-        </div>
-
-        <div class="control-switch">
-          <span>STT</span>
-          <div class="switch" id="stt-switch"></div>
+        <div class="side-toggle joystick-toggle">
+          <span>Stop</span>
+          <div class="switch" id="stop-mode-switch"></div>
         </div>
       </div>
     </div>
 
-    <!-- Side Right: System Controls -->
-    <div class="side-right-group">
-      <div class="slider-vertical-group">
-        <div class="side-toggle right-toggle">
-          <span>Speed Limit</span>
-          <div class="switch" id="speed-limit-switch"></div>
+    <!-- Right Side: Speed Control -->
+    <div class="joystick-right-panel">
+      <div class="vertical-slider">
+        <div class="slider-track">
+          <input type="range" min="0" max="100" value="50" class="range-slider vertical" id="speed-slider" orient="vertical">
         </div>
-        <div class="side-toggle right-toggle">
+      </div>
+      
+      <!-- System Controls -->
+      <div class="joystick-controls">
+        <div class="side-toggle joystick-toggle">
+          <span>STT</span>
+          <div class="switch" id="stt-switch"></div>
+        </div>
+        <div class="side-toggle joystick-toggle">
           <span>HeadLamp</span>
           <div class="switch" id="headlamp-switch"></div>
         </div>
-        <div class="side-toggle right-toggle">
-          <span>Back to Override</span>
-          <div class="switch" id="back-override-switch"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Status Bar -->
+    <div class="joystick-status-bar">
+      <!-- Linha de cima: Speed, Left IR, Ultrasonic, Right IR, Direction -->
+      <div class="status-row status-row-top">
+        <div class="status-box joystick-status">
+          <span class="status-label">Speed</span>
+          <span class="status-value" id="speed-value">50%</span>
+        </div>
+
+        <div class="status-box joystick-status">
+          <span class="status-label">Left IR</span>
+          <span class="status-value" id="left-ir-value">0</span>
+        </div>
+
+        <div class="status-box joystick-status">
+          <span class="status-label">Ultrasonic</span>
+          <span class="status-value" id="ultrasonic-value">0 cm</span>
+        </div>
+
+        <div class="status-box joystick-status">
+          <span class="status-label">Right IR</span>
+          <span class="status-value" id="right-ir-value">0</span>
+        </div>
+
+        <div class="status-box joystick-status">
+          <span class="status-label">Direction</span>
+          <span class="status-value" id="direction-value">Center</span>
+        </div>
+      </div>
+
+      <!-- Linha de baixo: Left Motor, Right Motor -->
+      <div class="status-row status-row-bottom">
+        <div class="status-box joystick-status">
+          <span class="status-label">Left Motor</span>
+          <span class="status-value" id="left-motor-value">0</span>
+        </div>
+
+        <div class="status-box joystick-status">
+          <span class="status-label">Right Motor</span>
+          <span class="status-value" id="right-motor-value">0</span>
         </div>
       </div>
     </div>

@@ -1,0 +1,1791 @@
+/* ========================================
+   LUNA MOTION CONTROL CENTER - UNIFIED CSS
+   ======================================== */
+
+/* ========== BASE STYLES ========== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #000d23;
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  overflow: hidden;
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+/* ========== LAYOUT CONTAINERS ========== */
+.dashboard-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.main-dashboard-container {
+  width: 100vw;
+  height: 100vh;
+  background: #000D23;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ========== MAIN PANEL ========== */
+.main-panel {
+  background: #001330;
+  border: 1px solid #192539;
+  border-radius: clamp(20px, 4vw, 60px);
+  padding: clamp(15px, 2.5vw, 40px);
+  width: clamp(300px, 75vw, 1372px);
+  height: clamp(400px, 75vh, 930px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2vh, 22px);
+  overflow: hidden;
+}
+
+/* ========== SIDE PANELS ========== */
+.side-panel {
+  height: 100vh;
+  padding: clamp(10px, 2vh, 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-width: clamp(100px, 12vw, 150px);
+  max-width: clamp(120px, 15vw, 200px);
+  flex-shrink: 0;
+}
+
+.right-panel {
+  opacity: 0;
+}
+
+.center-panel {
+  width: clamp(400px, 70vw, 906px);
+  max-width: calc(100vw - 400px);
+  height: clamp(600px, 85vh, 930px);
+  max-height: calc(100vh - 40px);
+  padding: clamp(15px, 3vh, 40px);
+  background: #001330;
+  border-radius: 60px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overflow: hidden;
+}
+
+/* ========== SIDE GROUPS ========== */
+.side-left-group, .side-right-group {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: 50%;
+  transform: translateY(-50%);
+  height: auto;
+  max-height: 80vh;
+  justify-content: center;
+  gap: clamp(10px, 2vh, 20px);
+}
+
+.side-left-group {
+  left: clamp(10px, 2vw, 45px);
+}
+
+.side-right-group {
+  right: clamp(10px, 2vw, 45px);
+}
+
+.slider-vertical-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2vh, 15px);
+  height: auto;
+}
+
+/* ========== TITLES AND HEADERS ========== */
+.dashboard-title,
+.main-title {
+  color: #ffce34;
+  font-size: clamp(18px, 3vw, 48px);
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.dashboard-title {
+  margin-bottom: 0;
+}
+
+.main-title {
+  margin-bottom: clamp(20px, 3vh, 40px);
+}
+
+/* ========== LOGO AND BRANDING ========== */
+.logo-section {
+  margin-bottom: auto;
+}
+
+.logo {
+  width: clamp(60px, 8vw, 110px);
+  height: clamp(60px, 8vw, 110px);
+  object-fit: contain;
+}
+
+.datetime-section {
+  margin-top: auto;
+  margin-left: auto;
+}
+
+.datetime-text {
+  text-align: center;
+  color: white;
+  font-size: clamp(10px, 1.2vw, 20px);
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ========== CAMERA FEED ========== */
+.camera-feed {
+  background: #162946;
+  border: 1px solid #162946;
+  border-radius: 16px;
+  padding: clamp(10px, 2vw, 30px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.camera-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 10px;
+}
+
+.camera-header span {
+  color: #ffffff;
+  font-size: clamp(14px, 2vw, 32px);
+}
+
+.maximize-icon {
+  width: clamp(16px, 2vw, 30px);
+  height: clamp(16px, 2vw, 30px);
+  flex-shrink: 0;
+}
+
+.camera-stream {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: clamp(8px, 1vw, 16px);
+  background: #000;
+  min-height: 0;
+  flex: 1;
+  border: 1px solid #001430;
+  max-width: 1232px;
+  max-height: 505px;
+  margin: 0 auto;
+}
+
+/* ========== MAP SECTION ========== */
+.map-section {
+  width: 100%;
+  height: 470px;
+  padding: 30px;
+  background: #162946;
+  border-radius: 16px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+.map-title {
+  color: white;
+  font-size: 32px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+
+.map-container {
+  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+/* ========== MAP MARKERS ========== */
+.rover-marker {
+  position: absolute;
+  top: 45%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 100px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  z-index: 3;
+}
+
+.rover-marker.near-marker {
+  background: rgba(255, 0, 0, 0.8);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.rover-icon {
+  width: 15px;
+  height: 15px;
+  background: #FFCE34;
+  border: 1px solid #BF0000;
+  border-radius: 50%;
+}
+
+.position-marker {
+  position: absolute;
+  background: white;
+  border-radius: 100px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+.marker-1 {
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.marker-2 {
+  top: 42%;
+  left: 43%;
+  transform: translate(-50%, -50%);
+}
+
+.pink-marker {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.green-marker {
+  width: 15px;
+  height: 15px;
+}
+
+/* ========== STATUS SECTION ========== */
+.status-section {
+  height: 140px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.status-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(5px, 1vw, 50px);
+  flex-wrap: wrap;
+  padding: clamp(5px, 1vh, 10px) 0;
+  height: auto;
+  min-height: 80px;
+}
+
+.status-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 20px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+/* ========== STATUS BOXES AND CONTROLS ========== */
+.status-box,
+.control-switch {
+  background: #162946;
+  border: 1px solid #162946;
+  border-radius: 14px;
+  padding: 16px 6px;
+  flex: 1;
+  min-width: clamp(60px, 8vw, 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 0.5vh, 5px);
+}
+
+.control-switch {
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.control-switch span {
+  color: #ffce34;
+  font-size: clamp(10px, 1.2vw, 32px);
+}
+
+.status-label {
+  color: #ffce34;
+  font-size: clamp(10px, 1.2vw, 32px);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-value {
+  color: #ffffff;
+  font-size: clamp(10px, 1.2vw, 20px);
+  font-weight: bold;
+}
+
+/* ========== STATUS INDICATORS ========== */
+.status-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-indicator.online {
+  background: #05D158;
+  border: 2px solid #059B42;
+}
+
+.status-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.status-dot.online {
+  background: #05D158;
+  border-color: #059B42;
+}
+
+.status-dot.offline {
+  background: #BF0000;
+  border-color: #760000;
+}
+
+/* ========== ICONS ========== */
+.status-icon,
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.nav-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.speed-icon {
+  background: url('ASSETS/SpeedIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.direction-icon {
+  background: url('ASSETS/CompassIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.mode-icon {
+  background: url('ASSETS/RoverModeIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.signal-icon {
+  background: url('ASSETS/SignalIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.strength-icon {
+  background: url('ASSETS/StrengthIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.update-icon {
+  background: url('ASSETS/UpdateIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.places-icon {
+  background: url('ASSETS/FolderIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.satellites-icon {
+  background: url('ASSETS/SatteliteIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.configs-icon {
+  background: url('ASSETS/ConfigurationIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.override-icon {
+  background: url('ASSETS/OverrideIcon.svg') no-repeat center;
+  background-size: contain;
+}
+
+.satellite-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.info-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.close-icon {
+  width: 13.68px;
+  height: 13.68px;
+  position: absolute;
+  left: 1.16px;
+  top: 1.16px;
+  cursor: pointer;
+}
+
+/* ========== NAVIGATION SECTION ========== */
+.navigation-section {
+  height: 119px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.nav-button {
+  flex: 1;
+  height: 100%;
+  padding: 16px 6px;
+  background: #162946;
+  border-radius: 14px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.nav-button:hover {
+  background: #1a2d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 206, 52, 0.3);
+}
+
+.nav-label {
+  color: white;
+  font-size: 18px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* ========== VERTICAL SLIDERS ========== */
+.vertical-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: clamp(60px, 6vw, 80px);
+  height: clamp(300px, 40vh, 625px);
+  max-height: 50vh;
+  min-height: 180px;
+  position: static;
+  margin: 0;
+}
+
+.left-slider {
+  left: clamp(20px, 3vw, 45px);
+  top: clamp(150px, 20vh, 217px);
+}
+
+.right-slider {
+  right: clamp(20px, 3vw, 45px);
+  top: clamp(150px, 20vh, 217px);
+}
+
+.slider-track {
+  background: #162946;
+  border-radius: 16px;
+  width: clamp(35px, 4vw, 45px);
+  height: 100%;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* ========== RANGE SLIDERS ========== */
+.range-slider.vertical {
+  -webkit-appearance: none;
+  appearance: none;
+  width: clamp(200px, 25vh, 500px);
+  height: clamp(30px, 3vh, 40px);
+  background: transparent;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  z-index: 2;
+  margin-left: clamp(-22.5px, -2vw, 0px);
+}
+
+.range-slider.vertical::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ffce34;
+  border-radius: 16px;
+  width: clamp(30px, 3vh, 40px);
+  height: clamp(60px, 8vh, 90px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.range-slider.vertical:hover::-webkit-slider-thumb,
+.range-slider.vertical:focus::-webkit-slider-thumb {
+  background: #d4af37;
+  transform: scale(1.1);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.22);
+}
+
+.range-slider.vertical::-moz-range-thumb {
+  background: #ffce34;
+  border-radius: 16px;
+  width: clamp(30px, 3vh, 40px);
+  height: clamp(60px, 8vh, 90px);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.range-slider.vertical:hover::-moz-range-thumb,
+.range-slider.vertical:focus::-moz-range-thumb {
+  background: #d4af37;
+  transform: scale(1.1);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.22);
+}
+
+.range-slider.vertical::-webkit-slider-runnable-track {
+  height: 39px;
+  background: transparent;
+}
+
+.range-slider.vertical::-ms-fill-lower,
+.range-slider.vertical::-ms-fill-upper {
+  background: transparent;
+}
+
+.range-slider.vertical:focus {
+  outline: none;
+}
+
+.range-slider.vertical::-moz-range-track {
+  background: transparent;
+}
+
+.range-slider.vertical::-ms-tooltip {
+  display: none;
+}
+
+/* ========== SIDE TOGGLES ========== */
+.side-toggle {
+  background: #162946;
+  border-radius: 16px;
+  padding: 13px 10px;
+  width: clamp(120px, 15vw, 174px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  position: static;
+  gap: clamp(5px, 1vh, 10px);
+  min-width: clamp(80px, 10vw, 120px);
+}
+
+.side-toggle span {
+  color: #ffffff;
+  font-size: clamp(12px, 1.5vw, 20px);
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ========== SWITCHES ========== */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: clamp(44px, 5.5vw, 64px);
+  height: clamp(24px, 2.8vw, 32px);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.7) 0%, rgba(0, 19, 48, 0.9) 100%);
+  border-radius: clamp(12px, 1.4vw, 16px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  vertical-align: middle;
+  border: 1px solid rgba(255, 206, 52, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  left: clamp(2px, 0.3vw, 3px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(18px, 2.2vw, 26px);
+  height: clamp(18px, 2.2vw, 26px);
+  background: linear-gradient(145deg, #FFFFFF, #f0f0f0);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 19, 48, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 19, 48, 0.3);
+}
+
+.switch.active {
+  background: linear-gradient(135deg, rgba(255, 206, 52, 0.8) 0%, rgba(255, 206, 52, 0.9) 100%);
+  border-color: rgba(255, 206, 52, 0.5);
+  box-shadow: 
+    inset 0 1px 3px rgba(255, 206, 52, 0.2),
+    0 2px 6px rgba(255, 206, 52, 0.3);
+}
+
+.switch.active::before {
+  left: calc(100% - clamp(20px, 2.5vw, 29px));
+  background: linear-gradient(145deg, #FFFFFF, #f8f8f8);
+  border-color: rgba(255, 206, 52, 0.3);
+  box-shadow: 
+    0 2px 6px rgba(255, 206, 52, 0.3),
+    inset 0 0.5px 1px rgba(255, 255, 255, 0.3);
+}
+
+.switch:hover {
+  border-color: rgba(255, 206, 52, 0.4);
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 19, 48, 0.2),
+    0 2px 4px rgba(0, 19, 48, 0.2),
+    0 0 8px rgba(255, 206, 52, 0.2);
+}
+
+.switch:hover::before {
+  box-shadow: 
+    0 2px 6px rgba(0, 19, 48, 0.4),
+    inset 0 0.5px 1px rgba(255, 255, 255, 0.9);
+}
+
+.switch:active::before {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* Switch alternativo com knob separado (mantido para compatibilidade) */
+.switch-knob {
+  width: clamp(16px, 1.8vw, 22px);
+  height: clamp(16px, 1.8vw, 22px);
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: clamp(3px, 0.4vw, 4px);
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 1px 4px rgba(0, 0, 0, 0.2),
+    inset 0 0.5px 1px rgba(255, 255, 255, 0.8);
+}
+
+.switch.active .switch-knob {
+  left: calc(100% - clamp(19px, 2.2vw, 26px));
+  background: linear-gradient(145deg, #ffffff, #fafafa);
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.15),
+    inset 0 0.5px 1px rgba(255, 255, 255, 0.9);
+}
+
+/* ========== CLEAN JOYSTICK DESIGN IMPROVEMENTS ========== */
+
+/* Clean title style */
+.joystick-mode-title-clean {
+  color: #FFFFFF;
+  font-size: clamp(16px, 2.5vw, 28px);
+  margin: 0;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: clamp(6px, 1vh, 10px) clamp(12px, 2.5vw, 20px);
+  border-radius: clamp(6px, 1vw, 10px);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Clean status bar layout */
+.status-grid-clean {
+  display: flex;
+  gap: clamp(10px, 2vw, 16px);
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.status-group {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: clamp(4px, 0.8vw, 6px);
+  padding: clamp(6px, 1vh, 8px);
+  min-width: clamp(110px, 14vw, 160px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.8vh, 6px);
+}
+
+.group-header {
+  color: #FFFFFF;
+  font-size: clamp(9px, 1.1vw, 12px);
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: clamp(1px, 0.3vh, 2px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1px;
+  opacity: 0.8;
+}
+
+.status-items-row {
+  display: flex;
+  gap: clamp(6px, 1.2vw, 10px);
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-item-clean {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1px, 0.2vh, 2px);
+  min-width: clamp(30px, 3.5vw, 45px);
+}
+
+.status-label-clean {
+  color: #FFFFFF;
+  font-size: clamp(7px, 0.9vw, 10px);
+  font-weight: 400;
+  text-transform: uppercase;
+  opacity: 0.7;
+  letter-spacing: 0.2px;
+}
+
+.status-value-clean {
+  color: #FFFFFF;
+  font-size: clamp(9px, 1.2vw, 14px);
+  font-weight: 500;
+  text-align: center;
+  min-height: clamp(10px, 1.2vh, 16px);
+}
+
+/* Improved joystick status bar positioning */
+.joystick-status-bar {
+  position: absolute;
+  bottom: clamp(15px, 2.5vh, 25px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.7);
+  padding: clamp(10px, 1.5vh, 14px) clamp(14px, 2.5vw, 20px);
+  border-radius: clamp(6px, 1vw, 8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3;
+  pointer-events: auto;
+  max-width: 85vw;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Enhanced joystick title overlay positioning */
+.joystick-title-overlay {
+  position: absolute;
+  top: clamp(15px, 2.5vh, 25px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Clean responsive adjustments */
+@media (max-width: 768px) {
+  .status-grid-clean {
+    flex-direction: column;
+    gap: clamp(8px, 1.5vh, 12px);
+    align-items: center;
+  }
+  
+  .status-group {
+    min-width: clamp(200px, 60vw, 280px);
+    max-width: 90vw;
+  }
+  
+  .status-items-row {
+    justify-content: space-around;
+  }
+  
+  .joystick-mode-title-clean {
+    font-size: clamp(14px, 3vw, 20px);
+    padding: clamp(4px, 0.8vh, 8px) clamp(10px, 2vw, 16px);
+  }
+}
+
+@media (max-width: 480px) {
+  .status-grid-clean {
+    gap: clamp(6px, 1vh, 8px);
+  }
+  
+  .status-group {
+    padding: clamp(6px, 1vh, 8px);
+  }
+  
+  .group-header {
+    font-size: clamp(9px, 1.1vw, 12px);
+  }
+  
+  .status-label-clean {
+    font-size: clamp(7px, 0.9vw, 10px);
+  }
+  
+  .status-value-clean {
+    font-size: clamp(9px, 1.2vw, 14px);
+  }
+}
+
+/* ========== JOYSTICK MODE STYLES ========== */
+body.joystick-mode {
+  overflow: hidden;
+  position: relative;
+}
+
+.camera-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.camera-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.1) 0%, rgba(0, 19, 48, 0.2) 100%);
+  z-index: 1;
+}
+
+.fullscreen-camera {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.joystick-dashboard-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 3vw, 60px);
+  pointer-events: none;
+}
+
+.joystick-title-overlay {
+  position: absolute;
+  top: clamp(20px, 3vh, 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.joystick-mode-title {
+  color: #FFCE34;
+  font-size: clamp(20px, 3.5vw, 48px);
+  margin: 0;
+  text-align: center;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.9) 0%, rgba(0, 19, 48, 0.95) 100%);
+  padding: clamp(8px, 1.5vh, 15px) clamp(15px, 3vw, 30px);
+  border-radius: clamp(10px, 2vw, 20px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 206, 52, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 19, 48, 0.4);
+}
+
+.joystick-left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(25px, 4vh, 40px);
+  z-index: 3;
+  pointer-events: auto;
+  height: 100vh;
+  padding: clamp(35px, 5vh, 70px) 0;
+  min-width: clamp(160px, 18vw, 220px);
+}
+
+.joystick-right-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(25px, 4vh, 40px);
+  z-index: 3;
+  pointer-events: auto;
+  height: 100vh;
+  padding: clamp(35px, 5vh, 70px) 0;
+  min-width: clamp(100px, 12vw, 160px);
+}
+
+.joystick-controls {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(15px, 2.5vh, 25px);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.joystick-toggle {
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.9) 0%, rgba(0, 19, 48, 0.95) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.2);
+  border-radius: clamp(6px, 0.8vw, 10px);
+  min-width: clamp(110px, 12vw, 160px);
+  width: clamp(120px, 13vw, 170px);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(6px, 1.2vh, 10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 19, 48, 0.3);
+  transition: all 0.3s ease;
+}
+
+.joystick-toggle:hover {
+  border-color: rgba(255, 206, 52, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 19, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.joystick-toggle span {
+  color: #ffffff;
+  font-size: clamp(11px, 1.3vw, 16px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  margin-bottom: clamp(4px, 0.8vh, 8px);
+}
+
+.joystick-status-bar {
+  position: absolute;
+  bottom: clamp(25px, 4vh, 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5vh, 12px);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.9) 0%, rgba(0, 19, 48, 0.95) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.3);
+  padding: clamp(15px, 2.5vh, 20px) clamp(20px, 4vw, 35px);
+  border-radius: clamp(15px, 2.5vw, 25px);
+  backdrop-filter: blur(15px);
+  z-index: 3;
+  pointer-events: auto;
+  max-width: 90vw;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 25px rgba(0, 19, 48, 0.4);
+}
+
+.status-row {
+  display: flex;
+  gap: clamp(12px, 2.5vw, 25px);
+  justify-content: center;
+  align-items: center;
+}
+
+.joystick-status {
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.8) 0%, rgba(0, 19, 48, 0.9) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.2);
+  border-radius: clamp(6px, 1vw, 10px);
+  min-width: clamp(70px, 9vw, 120px);
+  padding: clamp(10px, 2vh, 15px) clamp(8px, 1.5vw, 12px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(3px, 0.5vh, 5px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.joystick-status:hover {
+  border-color: rgba(255, 206, 52, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 19, 48, 0.3);
+}
+
+.joystick-status .status-label {
+  font-size: clamp(10px, 1.2vw, 16px);
+  font-weight: 600;
+  color: #FFCE34;
+}
+
+.joystick-status .status-value {
+  font-size: clamp(9px, 1.1vw, 14px);
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Enhanced Joystick for fullscreen mode */
+.joystick-mode .joystick-container {
+  width: clamp(140px, 16vw, 200px);
+  height: clamp(140px, 16vw, 200px);
+  margin: 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.joystick-mode .joystick-base {
+  border: 2px solid rgba(255, 206, 52, 0.3);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.8) 0%, rgba(0, 19, 48, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    inset 0 2px 10px rgba(255, 206, 52, 0.1),
+    0 4px 20px rgba(0, 19, 48, 0.4);
+}
+
+.joystick-mode .joystick-knob {
+  width: clamp(50px, 6vw, 80px);
+  height: clamp(50px, 6vw, 80px);
+  background: linear-gradient(145deg, #FFCE34, #e6b82e);
+  box-shadow: 
+    0 clamp(4px, 0.6vw, 6px) clamp(15px, 2vw, 20px) rgba(255, 206, 52, 0.3),
+    inset 0 clamp(2px, 0.3vw, 3px) clamp(10px, 1.3vw, 12px) rgba(255, 255, 255, 0.2),
+    0 2px 10px rgba(0, 19, 48, 0.3);
+  border: 1px solid rgba(255, 206, 52, 0.4);
+  transition: all 0.2s ease;
+}
+
+.joystick-mode .joystick-knob:hover {
+  background: linear-gradient(145deg, #f4d23a, #d4af37);
+  box-shadow: 
+    0 clamp(4px, 0.6vw, 6px) clamp(15px, 2vw, 20px) rgba(255, 206, 52, 0.4),
+    inset 0 clamp(2px, 0.3vw, 3px) clamp(10px, 1.3vw, 12px) rgba(255, 255, 255, 0.3),
+    0 4px 15px rgba(0, 19, 48, 0.4);
+}
+
+/* Responsive adjustments for joystick mode */
+@media (max-width: 1200px) {
+  .joystick-left-panel, .joystick-right-panel {
+    padding: clamp(30px, 4vh, 60px) 0;
+    gap: clamp(25px, 4vh, 40px);
+  }
+  
+  .joystick-toggle {
+    min-width: clamp(110px, 16vw, 160px);
+    width: clamp(120px, 17vw, 170px);
+    height: clamp(65px, 8vh, 85px);
+  }
+}
+
+@media (max-width: 768px) {
+  .joystick-dashboard-container {
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(15px, 3vh, 25px);
+  }
+  
+  .joystick-left-panel {
+    flex-direction: row;
+    height: auto;
+    width: 100%;
+    justify-content: space-around;
+    padding: clamp(15px, 2vh, 25px) 0;
+    background: linear-gradient(135deg, rgba(0, 19, 48, 0.6) 0%, rgba(0, 19, 48, 0.8) 100%);
+    border-radius: clamp(10px, 2vw, 15px);
+    border: 1px solid rgba(255, 206, 52, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .joystick-right-panel {
+    flex-direction: row;
+    height: auto;
+    width: 100%;
+    justify-content: space-around;
+    padding: clamp(15px, 2vh, 25px) 0;
+    background: linear-gradient(135deg, rgba(0, 19, 48, 0.6) 0%, rgba(0, 19, 48, 0.8) 100%);
+    border-radius: clamp(10px, 2vw, 15px);
+    border: 1px solid rgba(255, 206, 52, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .joystick-status-bar {
+    position: relative;
+    bottom: auto;
+    transform: none;
+    margin-top: clamp(15px, 2vh, 25px);
+  }
+}
+
+/* Enhanced Vertical Slider for fullscreen mode */
+.joystick-mode .vertical-slider {
+  height: clamp(320px, 42vh, 480px);
+  width: clamp(70px, 8vw, 95px);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.joystick-mode .slider-track {
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.8) 0%, rgba(0, 19, 48, 0.9) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    inset 0 2px 10px rgba(255, 206, 52, 0.1),
+    0 4px 20px rgba(0, 19, 48, 0.3);
+}
+
+.joystick-mode .range-slider.vertical::-webkit-slider-thumb {
+  background: linear-gradient(145deg, #FFCE34, #e6b82e);
+  box-shadow: 
+    0 2px 8px rgba(255, 206, 52, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 206, 52, 0.4);
+}
+
+.joystick-mode .range-slider.vertical:hover::-webkit-slider-thumb {
+  background: linear-gradient(145deg, #f4d23a, #d4af37);
+  box-shadow: 
+    0 4px 12px rgba(255, 206, 52, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+/* ========== JOYSTICK CONTROLS ========== */
+.joystick-container {
+  position: relative;
+  width: clamp(120px, 15vw, 200px);
+  height: clamp(120px, 15vw, 200px);
+  margin: clamp(10px, 2vh, 20px) auto;
+}
+
+.joystick-base {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.8) 0%, rgba(0, 19, 48, 0.9) 100%);
+  border: 2px solid rgba(255, 206, 52, 0.3);
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    inset 0 2px 10px rgba(255, 206, 52, 0.1),
+    0 4px 20px rgba(0, 19, 48, 0.3);
+}
+
+.joystick-knob {
+  width: clamp(35px, 4.5vw, 60px);
+  height: clamp(35px, 4.5vw, 60px);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #FFCE34, #e6b82e);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  border: 1px solid rgba(255, 206, 52, 0.4);
+  box-shadow: 
+    0 2px 8px rgba(255, 206, 52, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+}
+
+.joystick-knob:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  background: linear-gradient(145deg, #f4d23a, #d4af37);
+  box-shadow: 
+    0 4px 12px rgba(255, 206, 52, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+.joystick-knob.active {
+  transform: translate(-50%, -50%) scale(0.98);
+  background: linear-gradient(145deg, #e6b82e, #d4af37);
+  box-shadow: 
+    0 1px 4px rgba(255, 206, 52, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+/* ========== SPEED CONTROL ========== */
+.speed-control {
+  margin: clamp(10px, 2vh, 30px) clamp(10px, 2vw, 20px);
+  text-align: center;
+}
+
+.speed-label {
+  color: #FFCE34;
+  font-size: clamp(12px, 1.5vw, 16px);
+  font-weight: bold;
+  margin-bottom: clamp(8px, 1vh, 15px);
+  display: block;
+}
+
+.speed-slider-container {
+  position: relative;
+  width: 100%;
+  height: clamp(25px, 3vh, 40px);
+  background: linear-gradient(90deg, #001330, #162946);
+  border-radius: clamp(12px, 1.5vh, 20px);
+  border: clamp(1px, 0.2vw, 2px) solid #DE5799;
+  overflow: hidden;
+}
+
+.speed-slider {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  width: clamp(25px, 3vw, 30px);
+  height: clamp(25px, 3vw, 30px);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #FFCE34, #d4af37);
+  cursor: pointer;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 10px rgba(255, 206, 52, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.speed-slider::-moz-range-thumb {
+  width: clamp(25px, 3vw, 30px);
+  height: clamp(25px, 3vw, 30px);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #FFCE34, #d4af37);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.speed-indicator {
+  position: absolute;
+  bottom: -25px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(10px, 1.2vw, 12px);
+  color: #888;
+}
+
+/* ========== CONTROL VALUES DISPLAY ========== */
+.control-values {
+  background: rgba(222, 87, 153, 0.1);
+  border: 1px solid #DE5799;
+  border-radius: clamp(8px, 1vw, 10px);
+  padding: clamp(8px, 1.5vh, 15px);
+  margin: clamp(8px, 1.5vh, 20px);
+  text-align: center;
+}
+
+.control-values h3 {
+  color: #FFCE34;
+  margin: 0 0 clamp(5px, 1vh, 10px) 0;
+  font-size: clamp(12px, 1.5vw, 16px);
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  margin: clamp(3px, 0.5vh, 5px) 0;
+  font-size: clamp(10px, 1.2vw, 14px);
+}
+
+.value-label {
+  color: #ccc;
+}
+
+.value-number {
+  color: #FFCE34;
+  font-weight: bold;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 2px;
+}
+
+.info-label, .info-value {
+  color: white;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* ========== SATELLITE POPUP ========== */
+.satellite-popup {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%) translateX(100%);
+  width: 353px;
+  height: 930px;
+  background: #001330;
+  box-shadow: 4px 4px 28px rgba(25, 37, 57, 0.25);
+  border-radius: 60px;
+  border: 2px solid #192539;
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+}
+
+.satellite-popup.show {
+  transform: translateY(-50%) translateX(-20px);
+}
+
+.satellite-popup-content {
+  padding: 25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.satellite-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.satellite-popup-title {
+  color: white;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  text-align: center;
+}
+
+.satellite-popup-close {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  position: relative;
+}
+
+.satellite-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overflow-y: auto;
+  align-items: center;
+}
+
+.satellite-card {
+  width: 275px;
+  height: 146px;
+  padding: 20px 20px 10px 20px;
+  background: #162946;
+  border-radius: 12px;
+  border: 1px solid #192539;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.satellite-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.satellite-name {
+  color: white;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.satellite-indicators {
+  display: flex;
+  gap: 5px;
+}
+
+.indicator-dot {
+  border-radius: 50%;
+}
+
+.indicator-dot.small {
+  width: 8px;
+  height: 8px;
+}
+
+.indicator-dot.large {
+  width: 12px;
+  height: 12px;
+}
+
+.satellite-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ========== POPUP OVERLAY ========== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Joystick Mode Responsive */
+@media (max-width: 1200px) {
+  .joystick-dashboard-container {
+    padding: 0 clamp(15px, 2vw, 40px);
+  }
+  
+  .joystick-left-panel, .joystick-right-panel {
+    gap: clamp(15px, 3vh, 30px);
+  }
+  
+  .joystick-status-bar {
+    gap: clamp(8px, 1.5vh, 12px);
+    max-width: 90vw;
+  }
+  
+  .status-row {
+    gap: clamp(8px, 1.5vw, 15px);
+  }
+}
+
+@media (max-width: 768px) {
+  .joystick-mode-title {
+    font-size: clamp(16px, 4vw, 24px);
+    padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 20px);
+  }
+  
+  .joystick-dashboard-container {
+    padding: 0 clamp(10px, 2vw, 20px);
+  }
+  
+  .joystick-left-panel, .joystick-right-panel {
+    padding: clamp(15px, 3vh, 40px) 0;
+  }
+  
+  .joystick-container {
+    width: clamp(120px, 20vw, 150px) !important;
+    height: clamp(120px, 20vw, 150px) !important;
+  }
+  
+  .joystick-mode .vertical-slider {
+    height: clamp(250px, 35vh, 350px);
+    width: clamp(50px, 8vw, 70px);
+  }
+  
+  .joystick-controls {
+    gap: clamp(10px, 2vh, 15px);
+    min-height: clamp(150px, 20vh, 200px);
+  }
+  
+  .joystick-toggle {
+    min-width: clamp(80px, 15vw, 120px);
+    max-width: clamp(100px, 18vw, 140px);
+    width: clamp(90px, 16vw, 130px);
+    height: clamp(50px, 7vh, 65px);
+    padding: clamp(8px, 1.5vh, 12px) clamp(6px, 1vw, 8px);
+  }
+  
+  .joystick-toggle span {
+    font-size: clamp(9px, 1.1vw, 13px);
+    margin-bottom: clamp(3px, 0.6vh, 5px);
+  }
+  
+  .joystick-status-bar {
+    gap: clamp(5px, 1vw, 10px);
+    padding: clamp(8px, 1.5vh, 12px) clamp(10px, 2vw, 15px);
+    bottom: clamp(10px, 2vh, 20px);
+  }
+  
+  .status-row {
+    gap: clamp(4px, 0.8vw, 8px);
+  }
+  
+  .joystick-status {
+    min-width: clamp(45px, 10vw, 80px);
+    padding: clamp(6px, 1vh, 8px) clamp(4px, 0.8vw, 6px);
+  }
+}
+
+@media (max-height: 600px) {
+  .joystick-title-overlay {
+    top: clamp(10px, 2vh, 20px);
+  }
+  
+  .joystick-mode-title {
+    font-size: clamp(14px, 3vh, 20px);
+    padding: clamp(4px, 0.8vh, 8px) clamp(8px, 2vw, 15px);
+  }
+  
+  .joystick-left-panel, .joystick-right-panel {
+    gap: clamp(10px, 2vh, 20px);
+  }
+  
+  .joystick-mode .vertical-slider {
+    height: clamp(200px, 30vh, 300px);
+  }
+  
+  .joystick-status-bar {
+    bottom: clamp(5px, 1vh, 10px);
+    padding: clamp(6px, 1vh, 8px) clamp(8px, 2vw, 12px);
+    gap: clamp(4px, 0.8vh, 8px);
+  }
+  
+  .status-row {
+    gap: clamp(3px, 0.6vw, 6px);
+  }
+}
+
+/* Tablets pequenos (768-1024px) */
+@media screen and (max-width: 1024px) and (min-width: 768px) and (orientation: landscape) {
+  .main-panel {
+    width: 90vw;
+    height: 85vh;
+    padding: 20px;
+  }
+  
+  .side-left-group, .side-right-group {
+    gap: 15px;
+  }
+  
+  .joystick-container {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Tablets grandes / Laptops pequenos (1025-1366px) */
+@media screen and (max-width: 1366px) and (min-width: 1025px) and (orientation: landscape) {
+  .main-panel {
+    width: 85vw;
+    height: 80vh;
+  }
+  
+  .side-left-group {
+    left: 2vw;
+  }
+  
+  .side-right-group {
+    right: 2vw;
+  }
+}
+
+/* Laptops médios (1367-1600px) */
+@media screen and (max-width: 1600px) and (min-width: 1367px) and (orientation: landscape) {
+  .main-panel {
+    width: 80vw;
+    height: 85vh;
+  }
+}
+
+/* Media Queries para telas menores */
+@media (max-width: 1200px) {
+  .main-panel {
+    width: 85vw;
+    height: 80vh;
+  }
+  
+  .side-left-group {
+    left: 1vw;
+  }
+  
+  .side-right-group {
+    right: 1vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-panel {
+    width: 95vw;
+    height: 85vh;
+    padding: 15px;
+  }
+  
+  .side-left-group, .side-right-group {
+    display: none;
+  }
+  
+  .dashboard-title {
+    font-size: 20px;
+  }
+  
+  .joystick-container {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .joystick-base {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .joystick-knob {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-height: 600px) {
+  .main-panel {
+    height: 95vh;
+    padding: 10px;
+  }
+  
+  .vertical-slider {
+    height: 30vh;
+  }
+}
+
+/* Forçar orientação horizontal em dispositivos móveis */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  body::before {
+    content: "Gire o dispositivo para o modo paisagem para melhor experiência";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 9999;
+    font-size: 16px;
+  }
+  
+  .dashboard-container {
+    filter: blur(5px);
+  }
+}

@@ -13,6 +13,7 @@ let commandInterval = null;
 let lastSentCommand = null; // Track last sent command to avoid duplicates
 let debounceTimeout = null; // For debouncing slider input
 let headLampState = false; // Track headlamp state
+let stopModeActive = false; // Track stop mode state
 const COMMAND_INTERVAL_MS = 1500; // Send command every 1.5 seconds
 const DEBOUNCE_MS = 50; // Debounce slider input
 
@@ -88,11 +89,17 @@ function sendSpeedCommandDebounced(leftValue, rightValue) {
 }
 
 function sendSpeedCommand(leftValue, rightValue) {
+  // If stop mode is active, override values to 0
+  if (stopModeActive) {
+    leftValue = 0;
+    rightValue = 0;
+  }
+  
   const command = {
     "K": parseInt(leftValue),
     "Q": parseInt(rightValue),
     "D": 90,
-    "M": headLampState
+    "M": stopModeActive ? false : headLampState // Turn off headlamp in stop mode
   };
   
   // Always store the command for continuous sending
@@ -134,7 +141,7 @@ function stopCommandInterval() {
   }
   // Send final stop command
   sendSpeedCommand(0, 0);
-  lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
+  lastCommand = { K: 0, Q: 0, D: 90, M: stopModeActive ? false : headLampState };
 }
 
 function getWebSocketStatusText() {
@@ -155,7 +162,36 @@ function getWebSocketStatusText() {
 }
 
 function handleServerResponse(data) {
-  // Process server response silently
+  // Process sensor data from rover
+  // Format: {"BV":7.58,"N":0,"P":0,"O":42.58,"J":0}
+  // O = Ultrasonic, N = Left IR, P = Right IR
+  
+  if (data.hasOwnProperty('O')) {
+    // Update Ultrasonic sensor value
+    const ultrasonicElement = document.getElementById('ultrasonic-value');
+    if (ultrasonicElement) {
+      ultrasonicElement.textContent = data.O.toFixed(1) + ' cm';
+    }
+  }
+  
+  if (data.hasOwnProperty('N')) {
+    // Update Left IR sensor value
+    const leftIRElement = document.getElementById('left-ir-value');
+    if (leftIRElement) {
+      leftIRElement.textContent = data.N;
+    }
+  }
+  
+  if (data.hasOwnProperty('P')) {
+    // Update Right IR sensor value
+    const rightIRElement = document.getElementById('right-ir-value');
+    if (rightIRElement) {
+      rightIRElement.textContent = data.P;
+    }
+  }
+  
+  // Log received data for debugging
+  console.log('[WebSocket] Dados recebidos:', data);
 }
 
 function updateConnectionStatus(connected) {
@@ -214,7 +250,7 @@ window.addEventListener('DOMContentLoaded', function() {
   connectToServer();
   
   // Start continuous command sending immediately
-  lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
+  lastCommand = { K: 0, Q: 0, D: 90, M: stopModeActive ? false : headLampState };
   startCommandInterval();
   
   const leftSlider = document.getElementById('left-range-slider');
@@ -256,39 +292,12 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Update status values (simulated real-time data)
-  function updateStatusValues() {
-    const ultrasonicValue = document.getElementById('ultrasonic-value');
-    const leftIrValue = document.getElementById('left-ir-value');
-    const rightIrValue = document.getElementById('right-ir-value');
-    
-    if (ultrasonicValue) {
-      // Simulate ultrasonic readings
-      const distance = Math.floor(Math.random() * 50) + 10;
-      ultrasonicValue.textContent = `${distance} cm`;
-    }
-    
-    if (leftIrValue) {
-      // Simulate IR sensor readings
-      const leftIr = Math.floor(Math.random() * 100);
-      leftIrValue.textContent = leftIr;
-    }
-    
-    if (rightIrValue) {
-      // Simulate IR sensor readings  
-      const rightIr = Math.floor(Math.random() * 100);
-      rightIrValue.textContent = rightIr;
-    }
-  }
-
   // Initialize datetime update
   updateDateTime();
   setInterval(updateDateTime, 1000);
   
-  // Initialize status updates (if on override page)
-  if (document.getElementById('ultrasonic-value')) {
-    setInterval(updateStatusValues, 2000);
-  }
+  // Note: Sensor values (IR and Ultrasonic) are now updated only via WebSocket data
+  // No more simulated random values
   const rightSlider = document.getElementById('right-range-slider');
   
   if (leftSlider && rightSlider) {
@@ -334,6 +343,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('[HeadLamp] Estado alterado para:', headLampState);
                 
                 // Send command immediately when headlamp changes
+                if (lastCommand) {
+                    sendSpeedCommand(lastCommand.K, lastCommand.Q);
+                }
+            }
+            
+            // Handle Stop Mode switch specifically
+            if (sw.id === 'stop-mode-switch') {
+                stopModeActive = sw.classList.contains('active');
+                console.log('[Stop Mode] Estado alterado para:', stopModeActive);
+                
+                // Send command immediately when stop mode changes
                 if (lastCommand) {
                     sendSpeedCommand(lastCommand.K, lastCommand.Q);
                 }

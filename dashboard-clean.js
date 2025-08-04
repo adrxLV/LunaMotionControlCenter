@@ -1,29 +1,29 @@
 let isSyncing = false;
 let slideLockActive = false;
 
-// WebSocket configuration
+// WebSocket config
 const SERVER_URL = 'ws://192.168.4.1:8765';
 let websocket = null;
 let isConnected = false;
 let connectionTimeout = null;
 
-// Command sending configuration
+
 let lastCommand = null;
 let commandInterval = null;
-let lastSentCommand = null; // Track last sent command to avoid duplicates
-let debounceTimeout = null; // For debouncing slider input
-let headLampState = false; // Track headlamp state
-const COMMAND_INTERVAL_MS = 1500; // Send command every 1.5 seconds
-const DEBOUNCE_MS = 50; // Debounce slider input
+let lastSentCommand = null;
+let debounceTimeout = null;
+let headLampState = false; 
+const COMMAND_INTERVAL_MS = 1500; 
+const DEBOUNCE_MS = 50;
 
-// WebSocket functions
+// WebSocket func
 function connectToServer() {
   console.log('[WebSocket] Conectando ao servidor:', SERVER_URL);
   
   try {
     websocket = new WebSocket(SERVER_URL);
     
-    // Set connection timeout
+    //  timeout
     connectionTimeout = setTimeout(() => {
       if (websocket.readyState === WebSocket.CONNECTING) {
         console.error('[WebSocket] Timeout - Servidor nao respondeu');
@@ -53,7 +53,6 @@ function connectToServer() {
       isConnected = false;
       updateConnectionStatus(false);
       
-      // Auto-reconnect after 3 seconds
       setTimeout(connectToServer, 3000);
     };
     
@@ -72,17 +71,14 @@ function connectToServer() {
 }
 
 function sendSpeedCommandDebounced(leftValue, rightValue) {
-  // Clear any existing debounce timeout
   if (debounceTimeout) {
     clearTimeout(debounceTimeout);
   }
   
-  // Set new debounce timeout
   debounceTimeout = setTimeout(() => {
     const leftVal = parseInt(leftValue);
     const rightVal = parseInt(rightValue);
     
-    // Send command immediately when slider changes
     sendSpeedCommand(leftVal, rightVal);
   }, DEBOUNCE_MS);
 }
@@ -95,14 +91,13 @@ function sendSpeedCommand(leftValue, rightValue) {
     "M": headLampState
   };
   
-  // Always store the command for continuous sending
   lastCommand = command;
   
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     try {
       const message = JSON.stringify(command);
       websocket.send(message);
-      lastSentCommand = { ...command }; // Track what was actually sent
+      lastSentCommand = { ...command }; 
       console.log('[Comando] Enviado:', message);
     } catch (error) {
       console.error('[Comando] Falha ao enviar comando:', error);
@@ -113,15 +108,12 @@ function sendSpeedCommand(leftValue, rightValue) {
 }
 
 function startCommandInterval() {
-  // Clear any existing interval
   if (commandInterval) {
     clearInterval(commandInterval);
   }
   
-  // Start sending commands every 1.5 seconds regardless of values
   commandInterval = setInterval(() => {
     if (lastCommand) {
-      // Always send the last command to maintain connection
       sendSpeedCommand(lastCommand.K, lastCommand.Q);
     }
   }, COMMAND_INTERVAL_MS);
@@ -132,7 +124,6 @@ function stopCommandInterval() {
     clearInterval(commandInterval);
     commandInterval = null;
   }
-  // Send final stop command
   sendSpeedCommand(0, 0);
   lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
 }
@@ -155,15 +146,12 @@ function getWebSocketStatusText() {
 }
 
 function handleServerResponse(data) {
-  // Process server response silently
 }
 
 function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
-  // Visual indicators can be added here later
 }
 
-// Função para snap magnético
 function applyMagneticSnap(slider, snapValue = 0, snapRange = 8) {
   const value = parseInt(slider.value, 10);
   if (Math.abs(value - snapValue) <= snapRange && value !== snapValue) {
@@ -184,7 +172,6 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
   
   if (slideLockActive && targetSlider) {
     targetSlider.value = sourceSlider.value;
-    // Atualiza a UI 
     const event = new Event('input', { bubbles: true });
     targetSlider.dispatchEvent(event);
     
@@ -194,7 +181,6 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
     }
   }
   
-  // Send speed command in real-time
   const leftSlider = document.getElementById('left-range-slider');
   const rightSlider = document.getElementById('right-range-slider');
   if (leftSlider && rightSlider) {
@@ -210,16 +196,13 @@ function syncSliders(sourceSlider, targetSlider, snapValue = 0, snapRange = 8) {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  // Initialize WebSocket connection
   connectToServer();
   
-  // Start continuous command sending immediately
   lastCommand = { K: 0, Q: 0, D: 90, M: headLampState };
   startCommandInterval();
   
   const leftSlider = document.getElementById('left-range-slider');
 
-  // Navigation functionality for main dashboard
   const overrideBtn = document.getElementById('override-btn');
   
   if (overrideBtn) {
@@ -228,7 +211,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Update current date and time
   function updateDateTime() {
     const now = new Date();
     const options = {
@@ -256,39 +238,11 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Update status values (simulated real-time data)
-  function updateStatusValues() {
-    const ultrasonicValue = document.getElementById('ultrasonic-value');
-    const leftIrValue = document.getElementById('left-ir-value');
-    const rightIrValue = document.getElementById('right-ir-value');
-    
-    if (ultrasonicValue) {
-      // Simulate ultrasonic readings
-      const distance = Math.floor(Math.random() * 50) + 10;
-      ultrasonicValue.textContent = `${distance} cm`;
-    }
-    
-    if (leftIrValue) {
-      // Simulate IR sensor readings
-      const leftIr = Math.floor(Math.random() * 100);
-      leftIrValue.textContent = leftIr;
-    }
-    
-    if (rightIrValue) {
-      // Simulate IR sensor readings  
-      const rightIr = Math.floor(Math.random() * 100);
-      rightIrValue.textContent = rightIr;
-    }
-  }
-
-  // Initialize datetime update
   updateDateTime();
   setInterval(updateDateTime, 1000);
   
-  // Initialize status updates (if on override page)
-  if (document.getElementById('ultrasonic-value')) {
-    setInterval(updateStatusValues, 2000);
-  }
+  // Note: Sensor values (IR and Ultrasonic) are now updated only via WebSocket data
+  // No more simulated random values
   const rightSlider = document.getElementById('right-range-slider');
   
   if (leftSlider && rightSlider) {
@@ -301,7 +255,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Add event listeners to stop rover when page is closed or unloaded
   window.addEventListener('beforeunload', function() {
     stopCommandInterval();
   });
@@ -310,13 +263,11 @@ window.addEventListener('DOMContentLoaded', function() {
     stopCommandInterval();
   });
   
-  // Stop rover if user navigates away
   window.addEventListener('pagehide', function() {
     stopCommandInterval();
   });
 });
 
-// JavaScript para controlar switches e sliders na dashboard
 document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.switch').forEach(function (sw) {
@@ -328,18 +279,15 @@ document.addEventListener('DOMContentLoaded', function () {
         sw.addEventListener('click', function () {
             sw.classList.toggle('active');
             
-            // Handle HeadLamp switch specifically
             if (sw.id === 'headlamp-switch') {
                 headLampState = sw.classList.contains('active');
                 console.log('[HeadLamp] Estado alterado para:', headLampState);
                 
-                // Send command immediately when headlamp changes
                 if (lastCommand) {
                     sendSpeedCommand(lastCommand.K, lastCommand.Q);
                 }
             }
             
-            // Handle Joystick Mode switch
             if (sw.id === 'joystick-mode-switch') {
                 if (sw.classList.contains('active')) {
                     console.log('[UI] Mudando para modo Joystick');
@@ -382,7 +330,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
-            // Use debounced command sending
             const rightValue = parseInt(document.getElementById('right-range-slider').value);
             const leftValue = parseInt(leftSlider.value);
             
@@ -400,7 +347,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     isSyncing = false;
                 }, 5);
             }
-            // Use debounced command sending
             const leftValue = parseInt(document.getElementById('left-range-slider').value);
             const rightValue = parseInt(rightSlider.value);
             
@@ -408,7 +354,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Sliders (vertical)
     document.querySelectorAll('.slider-input').forEach(function (slider) {
         const track = slider.closest('.slider-track');
         const thumb = track.querySelector('.slider-thumb');
@@ -426,7 +371,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         slider.addEventListener('input', function() {
             updateThumb();
-            // Use debounced command sending for slider changes
             const leftSlider = document.getElementById('left-range-slider');
             const rightSlider = document.getElementById('right-range-slider');
             if (leftSlider && rightSlider) {
@@ -441,5 +385,5 @@ document.addEventListener('DOMContentLoaded', function () {
         updateThumb();
     });
     
-    // Initialization complete
+
 });

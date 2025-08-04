@@ -154,13 +154,21 @@ function calculateMotorValues() {
 function updateMotorValues() {
     const motorValues = calculateMotorValues();
     
+    // Check if stop mode is active (get from dashboard.js)
+    const stopModeSwitch = document.getElementById('stop-mode-switch');
+    const isStopModeActive = stopModeSwitch && stopModeSwitch.classList.contains('active');
+    
+    // Override motor values if stop mode is active
+    const leftMotor = isStopModeActive ? 0 : motorValues.left;
+    const rightMotor = isStopModeActive ? 0 : motorValues.right;
+    
     // Update display
-    document.getElementById('left-motor-value').textContent = motorValues.left;
-    document.getElementById('right-motor-value').textContent = motorValues.right;
+    document.getElementById('left-motor-value').textContent = leftMotor;
+    document.getElementById('right-motor-value').textContent = rightMotor;
     
     // Send command to rover
     if (typeof sendSpeedCommandDebounced === 'function') {
-        sendSpeedCommandDebounced(motorValues.left, motorValues.right);
+        sendSpeedCommandDebounced(leftMotor, rightMotor);
     }
 }
 
@@ -170,6 +178,15 @@ function updateSpeedDisplay() {
 }
 
 function updateDirectionDisplay() {
+    // Check if stop mode is active
+    const stopModeSwitch = document.getElementById('stop-mode-switch');
+    const isStopModeActive = stopModeSwitch && stopModeSwitch.classList.contains('active');
+    
+    if (isStopModeActive) {
+        document.getElementById('direction-value').textContent = 'STOP';
+        return;
+    }
+    
     const normalizedX = joystickPosition.x / JOYSTICK_RADIUS;
     const normalizedY = -joystickPosition.y / JOYSTICK_RADIUS;
     
@@ -246,6 +263,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backSwitch) {
             backSwitch.addEventListener('click', function() {
                 window.location.href = 'override.html';
+            });
+        }
+        
+        // Add stop mode switch listener
+        const stopModeSwitch = document.getElementById('stop-mode-switch');
+        if (stopModeSwitch) {
+            stopModeSwitch.addEventListener('click', function() {
+                // Force update motor values when stop mode changes
+                setTimeout(() => {
+                    updateMotorValues();
+                    updateDirectionDisplay();
+                }, 10);
             });
         }
         
