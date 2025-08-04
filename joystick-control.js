@@ -4,9 +4,14 @@ let joystickPosition = { x: 0, y: 0 };
 let speedMultiplier = 0.5; // 50% initial speed
 let isDragging = false;
 
+// Gamepad control
+let gamepadActive = false;
+let gamepadIndex = -1;
+
 // Joystick configuration
 const JOYSTICK_RADIUS = 70; // Maximum distance from center
 const DEAD_ZONE = 10; // Dead zone radius in pixels
+const GAMEPAD_DEAD_ZONE = 0.15; // Dead zone for gamepad analog sticks
 
 // Initialize joystick control
 function initializeJoystick() {
@@ -163,12 +168,23 @@ function updateMotorValues() {
     const rightMotor = isStopModeActive ? 0 : motorValues.right;
     
     // Update display
-    document.getElementById('left-motor-value').textContent = leftMotor;
-    document.getElementById('right-motor-value').textContent = rightMotor;
+    const leftMotorElement = document.getElementById('left-motor-value');
+    const rightMotorElement = document.getElementById('right-motor-value');
     
-    // Send command to rover
+    if (leftMotorElement) leftMotorElement.textContent = leftMotor;
+    if (rightMotorElement) rightMotorElement.textContent = rightMotor;
+    
+    // Send command to rover - try multiple ways to ensure it works
     if (typeof sendSpeedCommandDebounced === 'function') {
         sendSpeedCommandDebounced(leftMotor, rightMotor);
+    } else if (typeof window.sendSpeedCommandDebounced === 'function') {
+        window.sendSpeedCommandDebounced(leftMotor, rightMotor);
+    } else if (typeof sendSpeedCommand === 'function') {
+        sendSpeedCommand(leftMotor, rightMotor);
+    } else if (typeof window.sendSpeedCommand === 'function') {
+        window.sendSpeedCommand(leftMotor, rightMotor);
+    } else {
+        console.warn('[Joystick] Send command function not available');
     }
 }
 
@@ -227,7 +243,7 @@ function initializeKeyboardControl() {
     });
     
     function handleKeyboardInput() {
-        if (!joystickActive) { // Only if not using mouse/touch
+        if (!joystickActive && !gamepadActive) { // Only if not using mouse/touch or gamepad
             let x = 0, y = 0;
             
             if (keyState['KeyW'] || keyState['ArrowUp']) y = -KEYBOARD_SPEED * JOYSTICK_RADIUS;
@@ -251,12 +267,152 @@ function initializeKeyboardControl() {
     }
 }
 
+// Gamepad support
+function initializeGamepadControl() {
+    // Check for gamepad support
+    if (!navigator.getGamepads) {
+        console.log('[Gamepad] Gamepad API not supported');
+        return;
+    }
+    
+    // Listen for gamepad connection
+    window.addEventListener('gamepadconnected', function(e) {
+        console.log('[Gamepad] Gamepad connected:', e.gamepad.id);
+        gamepadIndex = e.gamepad.index;
+        startGamepadLoop();
+    });
+    
+    window.addEventListener('gamepaddisconnected', function(e) {
+        console.log('[Gamepad] Gamepad disconnected:', e.gamepad.id);
+        gamepadActive = false;
+        gamepadIndex = -1;
+        
+        // Reset joystick position when gamepad disconnects
+        if (!joystickActive) {
+            joystickPosition = { x: 0, y: 0 };
+            updateJoystickVisual();
+            updateMotorValues();
+            updateDirectionDisplay();
+        }
+    });
+    
+    // Check if gamepad is already connected
+    const gamepads = navigator.getGamepads();
+    for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i]) {
+            console.log('[Gamepad] Gamepad already connected:', gamepads[i].id);
+            gamepadIndex = i;
+            startGamepadLoop();
+            break;
+        }
+    }
+}
+
+function startGamepadLoop() {
+    if (gamepadIndex === -1) return;
+    
+    let lastUpdate = 0;
+    const UPDATE_INTERVAL = 50; // Update every 50ms (20 FPS)
+    
+    function gamepadLoop(timestamp) {
+        const gamepad = navigator.getGamepads()[gamepadIndex];
+        if (!gamepad) {
+            gamepadActive = false;
+            console.log('[Gamepad] Lost connection to gamepad');
+            return;
+        }
+        
+        // Throttle updates
+        if (timestamp - lastUpdate < UPDATE_INTERVAL) {
+            requestAnimationFrame(gamepadLoop);
+            return;
+        }
+        lastUpdate = timestamp;
+        
+        // Left stick for movement (axes 0 and 1)
+        const leftStickX = gamepad.axes[0];
+        const leftStickY = gamepad.axes[1];
+        
+        // Right stick for speed control (axes 2 and 3) - using Y axis
+        const rightStickY = gamepad.axes[3];
+        
+        // Apply dead zone to left stick
+        let processedLeftX = Math.abs(leftStickX) > GAMEPAD_DEAD_ZONE ? leftStickX : 0;
+        let processedLeftY = Math.abs(leftStickY) > GAMEPAD_DEAD_ZONE ? leftStickY : 0;
+        
+        // Apply dead zone to right stick
+        let processedRightY = Math.abs(rightStickY) > GAMEPAD_DEAD_ZONE ? rightStickY : 0;
+        
+        // Check if gamepad is being used
+        const gamepadInUse = Math.abs(processedLeftX) > 0 || Math.abs(processedLeftY) > 0 || Math.abs(processedRightY) > 0;
+        
+        if (gamepadInUse) {
+            if (!gamepadActive) {
+                console.log('[Gamepad] Gamepad input detected, taking control');
+            }
+            gamepadActive = true;
+            
+            // Update joystick position based on left stick
+            joystickPosition.x = processedLeftX * JOYSTICK_RADIUS;
+            joystickPosition.y = processedLeftY * JOYSTICK_RADIUS;
+            
+            // Update speed based on right stick Y axis
+            // Right stick up decreases speed, down increases speed
+            if (Math.abs(processedRightY) > 0) {
+                // Map -1 to 1 range to 0 to 1 speed multiplier
+                // Invert so up decreases speed and down increases speed
+                const speedChange = -processedRightY * 0.02; // Adjust sensitivity
+                const newSpeed = speedMultiplier + speedChange;
+                speedMultiplier = Math.max(0, Math.min(1, newSpeed));
+                
+                // Update speed slider and display
+                const speedSlider = document.getElementById('speed-slider');
+                if (speedSlider) speedSlider.value = speedMultiplier * 100;
+                updateSpeedDisplay();
+            }
+            
+            updateJoystickVisual();
+            updateMotorValues();
+            updateDirectionDisplay();
+            
+            // Debug log every few seconds
+            if (Math.floor(timestamp / 2000) !== Math.floor((timestamp - UPDATE_INTERVAL) / 2000)) {
+                const motorValues = calculateMotorValues();
+                console.log(`[Gamepad] Left: ${motorValues.left}, Right: ${motorValues.right}, Speed: ${Math.round(speedMultiplier * 100)}%`);
+            }
+        } else if (gamepadActive) {
+            // Gamepad was active but now neutral - reset position
+            console.log('[Gamepad] Gamepad returned to neutral, releasing control');
+            gamepadActive = false;
+            joystickPosition = { x: 0, y: 0 };
+            updateJoystickVisual();
+            updateMotorValues();
+            updateDirectionDisplay();
+        }
+        
+        // Continue loop
+        requestAnimationFrame(gamepadLoop);
+    }
+    
+    requestAnimationFrame(gamepadLoop);
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Wait a bit to ensure other scripts are loaded
     setTimeout(() => {
         initializeJoystick();
         initializeKeyboardControl();
+        initializeGamepadControl();
+        
+        // Check if send command functions are available
+        if (typeof sendSpeedCommandDebounced === 'function') {
+            console.log('[Joystick] sendSpeedCommandDebounced function available');
+        } else if (typeof sendSpeedCommand === 'function') {
+            console.log('[Joystick] sendSpeedCommand function available');
+        } else {
+            console.warn('[Joystick] No send command functions found - commands will not work');
+        }
         
         // Add navigation back to override
         const backSwitch = document.getElementById('back-override-switch');
@@ -280,6 +436,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('[Joystick] Sistema de controle inicializado');
         console.log('[Joystick] Controlos: Mouse/Touch no joystick, WASD ou setas, Espaço para parar');
+        console.log('[Gamepad] Sistema de gamepad inicializado');
+        console.log('[Gamepad] Controle Xbox: Stick esquerdo para direção, stick direito para velocidade');
     }, 100);
 });
 
@@ -289,14 +447,40 @@ window.joystickControl = {
     getSpeedMultiplier: () => speedMultiplier,
     setSpeedMultiplier: (value) => {
         speedMultiplier = Math.max(0, Math.min(1, value));
-        document.getElementById('speed-slider').value = speedMultiplier * 100;
+        const speedSlider = document.getElementById('speed-slider');
+        if (speedSlider) speedSlider.value = speedMultiplier * 100;
         updateSpeedDisplay();
         updateMotorValues();
     },
     reset: () => {
         joystickPosition = { x: 0, y: 0 };
+        gamepadActive = false;
         updateJoystickVisual();
         updateMotorValues();
         updateDirectionDisplay();
+    },
+    isGamepadConnected: () => gamepadIndex !== -1,
+    getGamepadStatus: () => ({
+        connected: gamepadIndex !== -1,
+        active: gamepadActive,
+        index: gamepadIndex
+    }),
+    testGamepad: () => {
+        if (gamepadIndex === -1) {
+            console.log('[Gamepad Test] No gamepad connected');
+            return;
+        }
+        const gamepad = navigator.getGamepads()[gamepadIndex];
+        if (!gamepad) {
+            console.log('[Gamepad Test] Gamepad not found');
+            return;
+        }
+        console.log(`[Gamepad Test] ID: ${gamepad.id}`);
+        console.log(`[Gamepad Test] Axes: [${gamepad.axes.map(a => a.toFixed(2)).join(', ')}]`);
+        console.log(`[Gamepad Test] Buttons: [${gamepad.buttons.map(b => b.pressed ? '1' : '0').join(', ')}]`);
+        
+        // Test sending command
+        console.log('[Gamepad Test] Testing motor command...');
+        updateMotorValues();
     }
 };
