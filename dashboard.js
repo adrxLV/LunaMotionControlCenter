@@ -14,8 +14,10 @@ let lastSentCommand = null; // Track last sent command to avoid duplicates
 let debounceTimeout = null; // For debouncing slider input
 let headLampState = false; // Track headlamp state
 let stopModeActive = false; // Track stop mode state
+let lastSpeedMultiplier = null; // Track speed changes for immediate sending
 const COMMAND_INTERVAL_MS = 1500; // Send command every 1.5 seconds
 const DEBOUNCE_MS = 50; // Debounce slider input
+const COMMAND_CHANGE_THRESHOLD = 25; // Send command only if change is >= 25%
 
 // WebSocket functions
 function connectToServer() {
@@ -83,12 +85,12 @@ function sendSpeedCommandDebounced(leftValue, rightValue) {
     const leftVal = parseInt(leftValue);
     const rightVal = parseInt(rightValue);
     
-    // Send command immediately when slider changes
-    sendSpeedCommand(leftVal, rightVal);
+    // Send command with intelligent throttling (not forced immediate for gamepad/joystick)
+    sendSpeedCommand(leftVal, rightVal, false);
   }, DEBOUNCE_MS);
 }
 
-function sendSpeedCommand(leftValue, rightValue) {
+function sendSpeedCommand(leftValue, rightValue, forceImmediate = false) {
   // If stop mode is active, override values to 0
   if (stopModeActive) {
     leftValue = 0;
@@ -105,11 +107,24 @@ function sendSpeedCommand(leftValue, rightValue) {
   // Always store the command for continuous sending
   lastCommand = command;
   
+  // Check if we should send this command immediately
+  const shouldSendImmediate = forceImmediate || 
+                              hasSignificantChange(command.K, command.Q) || 
+                              hasStateChange(command);
+  
+  if (!shouldSendImmediate) {
+    // Don't send if change is not significant enough
+    commandsSkipped++;
+    console.log(`[Comando] Mudança insignificante - K: ${command.K}, Q: ${command.Q} (threshold: ${COMMAND_CHANGE_THRESHOLD}%)`);
+    return;
+  }
+  
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     try {
       const message = JSON.stringify(command);
       websocket.send(message);
       lastSentCommand = { ...command }; // Track what was actually sent
+      commandsSent++;
       console.log('[Comando] Enviado:', message);
     } catch (error) {
       console.error('[Comando] Falha ao enviar comando:', error);
@@ -126,10 +141,11 @@ function startCommandInterval() {
   }
   
   // Start sending commands every 1.5 seconds regardless of values
+  // This loop always forces sending to maintain connection
   commandInterval = setInterval(() => {
     if (lastCommand) {
-      // Always send the last command to maintain connection
-      sendSpeedCommand(lastCommand.K, lastCommand.Q);
+      // Always send the last command to maintain connection (force immediate)
+      sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
     }
   }, COMMAND_INTERVAL_MS);
 }
@@ -139,8 +155,8 @@ function stopCommandInterval() {
     clearInterval(commandInterval);
     commandInterval = null;
   }
-  // Send final stop command
-  sendSpeedCommand(0, 0);
+  // Send final stop command (force immediate)
+  sendSpeedCommand(0, 0, true);
   lastCommand = { K: 0, Q: 0, D: 90, M: stopModeActive ? false : headLampState };
 }
 
@@ -198,6 +214,72 @@ function updateConnectionStatus(connected) {
   const status = connected ? 'CONECTADO' : 'DESCONECTADO';
   // Visual indicators can be added here later
 }
+
+// Function to check if command has changed significantly
+function hasSignificantChange(newLeftValue, newRightValue) {
+  if (!lastSentCommand) return true; // Send first command always
+  
+  const leftDiff = Math.abs(newLeftValue - lastSentCommand.K);
+  const rightDiff = Math.abs(newRightValue - lastSentCommand.Q);
+  
+  // Check if either motor has changed by the threshold amount
+  return leftDiff >= COMMAND_CHANGE_THRESHOLD || rightDiff >= COMMAND_CHANGE_THRESHOLD;
+}
+
+// Function to check if stop mode or headlamp state changed
+function hasStateChange(newCommand) {
+  if (!lastSentCommand) return true;
+  return lastSentCommand.M !== newCommand.M;
+}
+
+// Function to check if speed multiplier has changed (for immediate sending)
+function hasSpeedChange(currentSpeedMultiplier) {
+  if (lastSpeedMultiplier === null) {
+    lastSpeedMultiplier = currentSpeedMultiplier;
+    return false; // Don't trigger on first initialization
+  }
+  
+  const speedChanged = Math.abs(currentSpeedMultiplier - lastSpeedMultiplier) > 0.01; // 1% change threshold
+  if (speedChanged) {
+    lastSpeedMultiplier = currentSpeedMultiplier;
+    return true;
+  }
+  return false;
+}
+
+// Function to send speed command with speed multiplier consideration
+function sendSpeedCommandWithSpeed(leftValue, rightValue, speedMultiplier, forceImmediate = false) {
+  // Check if speed has changed significantly
+  const speedChanged = hasSpeedChange(speedMultiplier);
+  
+  // Force immediate if speed changed
+  return sendSpeedCommand(leftValue, rightValue, forceImmediate || speedChanged);
+}
+
+// Performance monitoring
+let commandsSent = 0;
+let commandsSkipped = 0;
+
+function getCommandStats() {
+  const total = commandsSent + commandsSkipped;
+  const efficiency = total > 0 ? ((commandsSkipped / total) * 100).toFixed(1) : 0;
+  return {
+    sent: commandsSent,
+    skipped: commandsSkipped,
+    total: total,
+    efficiency: `${efficiency}% throttled`
+  };
+}
+
+// Reset stats periodically
+setInterval(() => {
+  if (commandsSent > 0 || commandsSkipped > 0) {
+    const stats = getCommandStats();
+    console.log(`[Performance] Commands - Sent: ${stats.sent}, Skipped: ${stats.skipped}, Efficiency: ${stats.efficiency}`);
+    commandsSent = 0;
+    commandsSkipped = 0;
+  }
+}, 10000); // Log every 10 seconds
 
 // Função para snap magnético
 function applyMagneticSnap(slider, snapValue = 0, snapRange = 8) {
@@ -342,9 +424,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 headLampState = sw.classList.contains('active');
                 console.log('[HeadLamp] Estado alterado para:', headLampState);
                 
-                // Send command immediately when headlamp changes
+                // Send command immediately when headlamp changes (force immediate)
                 if (lastCommand) {
-                    sendSpeedCommand(lastCommand.K, lastCommand.Q);
+                    sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
                 }
             }
             
@@ -353,9 +435,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 stopModeActive = sw.classList.contains('active');
                 console.log('[Stop Mode] Estado alterado para:', stopModeActive);
                 
-                // Send command immediately when stop mode changes
+                // Send command immediately when stop mode changes (force immediate)
                 if (lastCommand) {
-                    sendSpeedCommand(lastCommand.K, lastCommand.Q);
+                    sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
                 }
             }
             
@@ -463,3 +545,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Initialization complete
 });
+
+// Export functions globally for other scripts
+window.sendSpeedCommandWithSpeed = sendSpeedCommandWithSpeed;
+window.getCommandStats = getCommandStats;
