@@ -74,8 +74,6 @@ body {
 .center-panel {
   width: clamp(400px, 70vw, 906px);
   max-width: calc(100vw - 400px);
-  height: clamp(600px, 85vh, 930px);
-  max-height: calc(100vh - 40px);
   padding: clamp(15px, 3vh, 40px);
   background: #001330;
   border-radius: 60px;
@@ -85,7 +83,9 @@ body {
   gap: 22px;
   overflow: hidden;
 }
-
+.status-unit{
+  color:white;
+}
 /* ========== SIDE GROUPS ========== */
 .side-left-group, .side-right-group {
   position: absolute;
@@ -1771,7 +1771,7 @@ body.joystick-mode {
 /* Forçar orientação horizontal em dispositivos móveis */
 @media screen and (orientation: portrait) and (max-width: 768px) {
   body::before {
-    content: "Gire o dispositivo para o modo paisagem para melhor experiência";
+    content: "Só funciona na Horizontal 🫤";
     position: fixed;
     top: 50%;
     left: 50%;

@@ -1,25 +1,30 @@
-// Joystick Control System
+/**
+ * ROVER CONTROL SYSTEM
+ * Sistema de controle do rover incluindo joystick, gamepad e teclado
+ */
+
+// ===========================================
+// CONFIGURAÇÃO DE VARIÁVEIS DO ROVER
+// ===========================================
 let joystickActive = false;
 let joystickPosition = { x: 0, y: 0 };
 let speedMultiplier = 0.5;
 let isDragging = false;
 
-// Gamepad control
+// Gamepad
 let gamepadActive = false;
 let gamepadIndex = -1;
-
-// Button state tracking for edge detection
 let lastButtonStates = {
-    buttonA: false,  // Button 0 - Controls headlamp
-    buttonB: false   // Button 1 - Controls stop mode
+    buttonA: false,
+    buttonB: false
 };
 
-// Joystick configuration
+// Configurações do joystick
 const JOYSTICK_RADIUS = 70;
 const DEAD_ZONE = 10;
 const GAMEPAD_DEAD_ZONE = 0.15;
 
-// Direction zones
+// Zonas direcionais
 const DIRECTION_ZONES = {
     STOP: 'stop',
     FORWARD: 'forward',
@@ -35,7 +40,9 @@ const DIRECTION_ZONES = {
 let lastDirectionZone = null;
 let lastZoneCommand = null;
 
-// Joystick functions
+// ===========================================
+// SISTEMA DE JOYSTICK
+// ===========================================
 function initializeJoystick() {
     const joystickKnob = document.getElementById('joystick-knob');
     const joystickBase = document.querySelector('.joystick-base');
@@ -43,42 +50,23 @@ function initializeJoystick() {
     
     if (!joystickKnob || !joystickBase || !speedSlider) return;
     
+    // Slider de velocidade
     speedSlider.addEventListener('input', function() {
-        const newSpeedMultiplier = parseInt(this.value) / 100;
-        const speedChanged = Math.abs(newSpeedMultiplier - speedMultiplier) > 0.01;
-        
-        speedMultiplier = newSpeedMultiplier;
+        speedMultiplier = parseInt(this.value) / 100;
         updateSpeedDisplay();
-        
-        if (speedChanged) {
-            console.log(`[Joystick] Speed changed to ${Math.round(speedMultiplier * 100)}% - forcing immediate command`);
-            // Force immediate command send
-            if (typeof sendSpeedCommandWithSpeed === 'function') {
-                const motorValues = calculateMotorValues();
-                const stopModeSwitch = document.getElementById('stop-mode-switch');
-                const isStopModeActive = stopModeSwitch && stopModeSwitch.classList.contains('active');
-                const leftMotor = isStopModeActive ? 0 : motorValues.left;
-                const rightMotor = isStopModeActive ? 0 : motorValues.right;
-                sendSpeedCommandWithSpeed(leftMotor, rightMotor, speedMultiplier, true);
-            } else {
-                updateMotorValues();
-            }
-        } else {
-            updateMotorValues();
-        }
+        updateMotorValues();
     });
     
-    // Mouse events for joystick
+    // Eventos do mouse
     joystickKnob.addEventListener('mousedown', startDrag);
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', stopDrag);
     
-    // Touch events for mobile
+    // Eventos touch para dispositivos móveis
     joystickKnob.addEventListener('touchstart', startDragTouch, { passive: false });
     document.addEventListener('touchmove', handleDragTouch, { passive: false });
     document.addEventListener('touchend', stopDrag);
     
-    // Initialize displays
     updateSpeedDisplay();
     updateMotorValues();
     updateDirectionDisplay();
@@ -129,10 +117,7 @@ function stopDrag() {
     joystickActive = false;
     document.getElementById('joystick-knob').classList.remove('active');
     
-    // Return to center with animation
     joystickPosition = { x: 0, y: 0 };
-    
-    // Reset direction zone tracking
     lastDirectionZone = null;
     lastZoneCommand = null;
     
@@ -142,17 +127,14 @@ function stopDrag() {
 }
 
 function updateJoystickPosition(deltaX, deltaY) {
-    // Calculate distance from center
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
-    // Limit to joystick radius
     if (distance > JOYSTICK_RADIUS) {
         const angle = Math.atan2(deltaY, deltaX);
         deltaX = Math.cos(angle) * JOYSTICK_RADIUS;
         deltaY = Math.sin(angle) * JOYSTICK_RADIUS;
     }
     
-    // Apply dead zone
     if (distance < DEAD_ZONE) {
         deltaX = 0;
         deltaY = 0;
@@ -174,106 +156,87 @@ function updateJoystickVisual() {
     joystickKnob.style.transform = `translate(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px))`;
 }
 
+// ===========================================
+// CÁLCULOS DO MOTOR
+// ===========================================
 function calculateMotorValues() {
-    // Normalize joystick position (-1 to 1)
     const normalizedX = joystickPosition.x / JOYSTICK_RADIUS;
-    const normalizedY = -joystickPosition.y / JOYSTICK_RADIUS; // Invert Y for forward/backward
+    const normalizedY = -joystickPosition.y / JOYSTICK_RADIUS;
     
-    // Calculate forward/backward and left/right components
     const forward = normalizedY;
     const turn = normalizedX;
     
-    // Calculate differential drive values
     let leftMotor = forward + turn;
     let rightMotor = forward - turn;
     
-    // Normalize to prevent values > 1
     const maxVal = Math.max(Math.abs(leftMotor), Math.abs(rightMotor));
     if (maxVal > 1) {
         leftMotor /= maxVal;
         rightMotor /= maxVal;
     }
     
-    // Apply speed multiplier and convert to -100 to 100 range
     leftMotor = Math.round(leftMotor * speedMultiplier * 100);
     rightMotor = Math.round(rightMotor * speedMultiplier * 100);
     
     return { left: leftMotor, right: rightMotor };
 }
 
-// Function to determine direction zone based on joystick position
 function getCurrentDirectionZone() {
     const normalizedX = joystickPosition.x / JOYSTICK_RADIUS;
     const normalizedY = -joystickPosition.y / JOYSTICK_RADIUS;
     
-    // Define thresholds for direction detection
     const FORWARD_THRESHOLD = 0.3;
     const TURN_THRESHOLD = 0.4;
-    const DIAGONAL_THRESHOLD = 0.25;
     
-    // Check if in dead zone
     if (Math.abs(normalizedX) < 0.15 && Math.abs(normalizedY) < 0.15) {
         return DIRECTION_ZONES.STOP;
     }
     
-    // Check for primarily forward/backward movement
     if (Math.abs(normalizedY) > FORWARD_THRESHOLD) {
         if (normalizedY > 0) {
-            // Forward movement
-            if (normalizedX > DIAGONAL_THRESHOLD) {
-                return DIRECTION_ZONES.FORWARD_RIGHT;
-            } else if (normalizedX < -DIAGONAL_THRESHOLD) {
-                return DIRECTION_ZONES.FORWARD_LEFT;
-            } else {
-                return DIRECTION_ZONES.FORWARD;
-            }
+            if (normalizedX > 0.25) return DIRECTION_ZONES.FORWARD_RIGHT;
+            if (normalizedX < -0.25) return DIRECTION_ZONES.FORWARD_LEFT;
+            return DIRECTION_ZONES.FORWARD;
         } else {
-            // Backward movement
-            if (normalizedX > DIAGONAL_THRESHOLD) {
-                return DIRECTION_ZONES.BACKWARD_RIGHT;
-            } else if (normalizedX < -DIAGONAL_THRESHOLD) {
-                return DIRECTION_ZONES.BACKWARD_LEFT;
-            } else {
-                return DIRECTION_ZONES.BACKWARD;
-            }
+            if (normalizedX > 0.25) return DIRECTION_ZONES.BACKWARD_RIGHT;
+            if (normalizedX < -0.25) return DIRECTION_ZONES.BACKWARD_LEFT;
+            return DIRECTION_ZONES.BACKWARD;
         }
     }
     
-    // Check for primarily turning movement
     if (Math.abs(normalizedX) > TURN_THRESHOLD) {
-        if (normalizedX > 0) {
-            return DIRECTION_ZONES.TURN_RIGHT;
-        } else {
-            return DIRECTION_ZONES.TURN_LEFT;
-        }
+        return normalizedX > 0 ? DIRECTION_ZONES.TURN_RIGHT : DIRECTION_ZONES.TURN_LEFT;
     }
     
-    // Default to stop if no clear direction
     return DIRECTION_ZONES.STOP;
 }
 
-// Function to check if we should send command based on direction zone change
 function shouldSendCommandForZone() {
     const currentZone = getCurrentDirectionZone();
     const motorValues = calculateMotorValues();
     
-    // Always send if zone changed
     if (currentZone !== lastDirectionZone) {
         lastDirectionZone = currentZone;
-        lastZoneCommand = { left: motorValues.left, right: motorValues.right, zone: currentZone };
-        console.log(`[Joystick] Direction changed to: ${currentZone} (L:${motorValues.left}, R:${motorValues.right})`);
+        lastZoneCommand = {
+            zone: currentZone,
+            left: motorValues.left,
+            right: motorValues.right,
+            timestamp: Date.now()
+        };
         return true;
     }
     
-    // Check if motor values changed significantly within the same zone (for speed changes)
     if (lastZoneCommand) {
         const leftDiff = Math.abs(motorValues.left - lastZoneCommand.left);
         const rightDiff = Math.abs(motorValues.right - lastZoneCommand.right);
         
-        // Only send if there's a significant change in motor values (speed change)
         if (leftDiff >= 15 || rightDiff >= 15) {
-            lastZoneCommand = { left: motorValues.left, right: motorValues.right, zone: currentZone };
-            console.log(`[Joystick] Speed changed in ${currentZone}: (L:${motorValues.left}, R:${motorValues.right})`);
+            lastZoneCommand = {
+                zone: currentZone,
+                left: motorValues.left,
+                right: motorValues.right,
+                timestamp: Date.now()
+            };
             return true;
         }
     }
@@ -284,49 +247,35 @@ function shouldSendCommandForZone() {
 function updateMotorValues() {
     const motorValues = calculateMotorValues();
     
-    // Check if stop mode is active (get from dashboard.js)
     const stopModeSwitch = document.getElementById('stop-mode-switch');
     const isStopModeActive = stopModeSwitch && stopModeSwitch.classList.contains('active');
     
-    // Override motor values if stop mode is active
     const leftMotor = isStopModeActive ? 0 : motorValues.left;
     const rightMotor = isStopModeActive ? 0 : motorValues.right;
     
-    // Update display (always update visual feedback)
     const leftMotorElement = document.getElementById('left-motor-value');
     const rightMotorElement = document.getElementById('right-motor-value');
     
     if (leftMotorElement) leftMotorElement.textContent = leftMotor;
     if (rightMotorElement) rightMotorElement.textContent = rightMotor;
     
-    // Only send command if direction zone changed or speed changed significantly
     if (shouldSendCommandForZone() || isStopModeActive !== (lastZoneCommand && lastZoneCommand.zone === DIRECTION_ZONES.STOP)) {
-        // Send command to rover - try multiple ways to ensure it works
+        console.log(`[Joystick] Zone: ${getCurrentDirectionZone()}, Motors: L=${leftMotor}, R=${rightMotor}`);
         if (typeof sendSpeedCommandWithSpeed === 'function') {
-            sendSpeedCommandWithSpeed(leftMotor, rightMotor, speedMultiplier);
+            sendSpeedCommandWithSpeed(leftMotor, rightMotor, speedMultiplier, false);
         } else if (typeof sendSpeedCommandDebounced === 'function') {
             sendSpeedCommandDebounced(leftMotor, rightMotor);
-        } else if (typeof window.sendSpeedCommandDebounced === 'function') {
-            window.sendSpeedCommandDebounced(leftMotor, rightMotor);
-        } else if (typeof sendSpeedCommand === 'function') {
-            sendSpeedCommand(leftMotor, rightMotor);
-        } else if (typeof window.sendSpeedCommand === 'function') {
-            window.sendSpeedCommand(leftMotor, rightMotor);
-        } else {
-            console.warn('[Joystick] Send command function not available');
         }
-    } else {
-        console.log(`[Joystick] Staying in ${getCurrentDirectionZone()} - no command sent`);
     }
 }
 
 function updateSpeedDisplay() {
     const speedPercentage = Math.round(speedMultiplier * 100);
-    document.getElementById('speed-value').textContent = speedPercentage + '%';
+    const speedElement = document.getElementById('speed-value');
+    if (speedElement) speedElement.textContent = speedPercentage + '%';
 }
 
 function updateDirectionDisplay() {
-    // Check if stop mode is active
     const stopModeSwitch = document.getElementById('stop-mode-switch');
     const isStopModeActive = stopModeSwitch && stopModeSwitch.classList.contains('active');
     
@@ -335,14 +284,10 @@ function updateDirectionDisplay() {
         return;
     }
     
-    // Use the zone-based direction system
     const currentZone = getCurrentDirectionZone();
     
     let displayText = 'Center';
     switch (currentZone) {
-        case DIRECTION_ZONES.STOP:
-            displayText = 'Center';
-            break;
         case DIRECTION_ZONES.FORWARD:
             displayText = 'Forward';
             break;
@@ -369,13 +314,16 @@ function updateDirectionDisplay() {
             break;
     }
     
-    document.getElementById('direction-value').textContent = displayText;
+    const directionElement = document.getElementById('direction-value');
+    if (directionElement) directionElement.textContent = displayText;
 }
 
-// Keyboard support
+// ===========================================
+// SISTEMA DE TECLADO
+// ===========================================
 function initializeKeyboardControl() {
     const keyState = {};
-    const KEYBOARD_SPEED = 0.7; // 70% of max radius
+    const KEYBOARD_SPEED = 0.7;
     
     document.addEventListener('keydown', function(e) {
         keyState[e.code] = true;
@@ -390,7 +338,7 @@ function initializeKeyboardControl() {
     });
     
     function handleKeyboardInput() {
-        if (!joystickActive && !gamepadActive) { // Only if not using mouse/touch or gamepad
+        if (!joystickActive) {
             let x = 0, y = 0;
             
             if (keyState['KeyW'] || keyState['ArrowUp']) y = -KEYBOARD_SPEED * JOYSTICK_RADIUS;
@@ -398,7 +346,6 @@ function initializeKeyboardControl() {
             if (keyState['KeyA'] || keyState['ArrowLeft']) x = -KEYBOARD_SPEED * JOYSTICK_RADIUS;
             if (keyState['KeyD'] || keyState['ArrowRight']) x = KEYBOARD_SPEED * JOYSTICK_RADIUS;
             
-            // Handle space bar for stop
             if (keyState['Space']) {
                 x = 0;
                 y = 0;
@@ -414,48 +361,33 @@ function initializeKeyboardControl() {
     }
 }
 
-// Gamepad support
+// ===========================================
+// SISTEMA DE GAMEPAD
+// ===========================================
 function initializeGamepadControl() {
-    // Check for gamepad support
     if (!navigator.getGamepads) {
-        console.log('[Gamepad] Gamepad API not supported');
+        console.warn('[Gamepad] API não suportada neste navegador');
         return;
     }
     
-    // Listen for gamepad connection
     window.addEventListener('gamepadconnected', function(e) {
-        console.log('[Gamepad] Gamepad connected:', e.gamepad.id);
+        console.log(`[Gamepad] Conectado: ${e.gamepad.id}`);
         gamepadIndex = e.gamepad.index;
         startGamepadLoop();
     });
     
     window.addEventListener('gamepaddisconnected', function(e) {
-        console.log('[Gamepad] Gamepad disconnected:', e.gamepad.id);
-        gamepadActive = false;
-        gamepadIndex = -1;
-        
-        // Reset button states
-        lastButtonStates.buttonA = false;
-        lastButtonStates.buttonB = false;
-        
-        // Reset direction zone tracking
-        lastDirectionZone = null;
-        lastZoneCommand = null;
-        
-        // Reset joystick position when gamepad disconnects
-        if (!joystickActive) {
-            joystickPosition = { x: 0, y: 0 };
-            updateJoystickVisual();
-            updateMotorValues();
-            updateDirectionDisplay();
+        console.log(`[Gamepad] Desconectado: ${e.gamepad.id}`);
+        if (e.gamepad.index === gamepadIndex) {
+            gamepadIndex = -1;
+            gamepadActive = false;
         }
     });
     
-    // Check if gamepad is already connected
     const gamepads = navigator.getGamepads();
     for (let i = 0; i < gamepads.length; i++) {
         if (gamepads[i]) {
-            console.log('[Gamepad] Gamepad already connected:', gamepads[i].id);
+            console.log(`[Gamepad] Detectado: ${gamepads[i].id}`);
             gamepadIndex = i;
             startGamepadLoop();
             break;
@@ -463,74 +395,35 @@ function initializeGamepadControl() {
     }
 }
 
-// Function to handle gamepad button presses
 function handleGamepadButtons(gamepad) {
     if (!gamepad || !gamepad.buttons) return;
     
-    // Button A (index 0) - Toggle headlamp
     const buttonAPressed = gamepad.buttons[0] && gamepad.buttons[0].pressed;
     if (buttonAPressed && !lastButtonStates.buttonA) {
-        // Button A was just pressed (edge detection)
         toggleHeadlamp();
     }
     lastButtonStates.buttonA = buttonAPressed;
     
-    // Button B (index 1) - Toggle stop mode
     const buttonBPressed = gamepad.buttons[1] && gamepad.buttons[1].pressed;
     if (buttonBPressed && !lastButtonStates.buttonB) {
-        // Button B was just pressed (edge detection)
         toggleStopMode();
     }
     lastButtonStates.buttonB = buttonBPressed;
 }
 
-// Function to toggle headlamp state
 function toggleHeadlamp() {
     const headlampSwitch = document.getElementById('headlamp-switch');
     if (headlampSwitch) {
-        // Toggle the switch state
-        headlampSwitch.classList.toggle('active');
-        
-        // Update the global headLampState from dashboard.js
-        if (typeof headLampState !== 'undefined') {
-            headLampState = headlampSwitch.classList.contains('active');
-            console.log('[Gamepad] Button A - HeadLamp toggled to:', headLampState);
-            
-            // Send immediate command to update rover state
-            if (typeof lastCommand !== 'undefined' && typeof sendSpeedCommand === 'function') {
-                sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
-            }
-        }
-    } else {
-        console.warn('[Gamepad] Button A - Headlamp switch not found');
+        headlampSwitch.click();
+        console.log('[Gamepad] Headlamp toggled');
     }
 }
 
-// Function to toggle stop mode state
 function toggleStopMode() {
     const stopModeSwitch = document.getElementById('stop-mode-switch');
     if (stopModeSwitch) {
-        // Toggle the switch state
-        stopModeSwitch.classList.toggle('active');
-        
-        // Update the global stopModeActive from dashboard.js
-        if (typeof stopModeActive !== 'undefined') {
-            stopModeActive = stopModeSwitch.classList.contains('active');
-            console.log('[Gamepad] Button B - Stop Mode toggled to:', stopModeActive);
-            
-            // Send immediate command to update rover state
-            if (typeof lastCommand !== 'undefined' && typeof sendSpeedCommand === 'function') {
-                sendSpeedCommand(lastCommand.K, lastCommand.Q, true);
-            }
-            
-            // If stop mode was activated, also update motor values display immediately
-            if (stopModeActive) {
-                updateMotorValues();
-                updateDirectionDisplay();
-            }
-        }
-    } else {
-        console.warn('[Gamepad] Button B - Stop mode switch not found');
+        stopModeSwitch.click();
+        console.log('[Gamepad] Stop mode toggled');
     }
 }
 
@@ -538,161 +431,94 @@ function startGamepadLoop() {
     if (gamepadIndex === -1) return;
     
     let lastUpdate = 0;
-    const UPDATE_INTERVAL = 100; // Update every 100ms (10 FPS) - reduced from 50ms to reduce spam
+    const UPDATE_INTERVAL = 100;
     
     function gamepadLoop(timestamp) {
         const gamepad = navigator.getGamepads()[gamepadIndex];
         if (!gamepad) {
-            gamepadActive = false;
-            console.log('[Gamepad] Lost connection to gamepad');
+            gamepadIndex = -1;
             return;
         }
         
-        // Throttle updates
         if (timestamp - lastUpdate < UPDATE_INTERVAL) {
             requestAnimationFrame(gamepadLoop);
             return;
         }
         lastUpdate = timestamp;
         
-        // Left stick for movement (axes 0 and 1)
         const leftStickX = gamepad.axes[0];
         const leftStickY = gamepad.axes[1];
         
-        // Triggers for speed control
-        // L2 trigger (left trigger) - decreases speed (axis 6 or button 6)
-        // R2 trigger (right trigger) - increases speed (axis 7 or button 7)
         let leftTrigger = 0;
         let rightTrigger = 0;
         
-        // Try to get trigger values from axes first (standard gamepad API)
-        if (gamepad.axes.length > 6) {
-            leftTrigger = Math.max(0, gamepad.axes[6]); // L2 trigger
-        }
-        if (gamepad.axes.length > 7) {
-            rightTrigger = Math.max(0, gamepad.axes[7]); // R2 trigger
-        }
+        if (gamepad.axes.length > 6) leftTrigger = Math.max(0, gamepad.axes[6]);
+        if (gamepad.axes.length > 7) rightTrigger = Math.max(0, gamepad.axes[7]);
         
-        // Fallback: try to get from buttons if axes don't exist
-        if (leftTrigger === 0 && gamepad.buttons[6]) {
-            leftTrigger = gamepad.buttons[6].value;
-        }
-        if (rightTrigger === 0 && gamepad.buttons[7]) {
-            rightTrigger = gamepad.buttons[7].value;
-        }
+        if (leftTrigger === 0 && gamepad.buttons[6]) leftTrigger = gamepad.buttons[6].value;
+        if (rightTrigger === 0 && gamepad.buttons[7]) rightTrigger = gamepad.buttons[7].value;
         
-        // Apply dead zone to left stick
         let processedLeftX = Math.abs(leftStickX) > GAMEPAD_DEAD_ZONE ? leftStickX : 0;
         let processedLeftY = Math.abs(leftStickY) > GAMEPAD_DEAD_ZONE ? leftStickY : 0;
         
-        // Apply dead zone to triggers (smaller dead zone for triggers)
         const TRIGGER_DEAD_ZONE = 0.05;
         let processedLeftTrigger = leftTrigger > TRIGGER_DEAD_ZONE ? leftTrigger : 0;
         let processedRightTrigger = rightTrigger > TRIGGER_DEAD_ZONE ? rightTrigger : 0;
         
-        // Handle button presses (A and B buttons)
         handleGamepadButtons(gamepad);
         
-        // Check if gamepad is being used (movement or triggers)
         const gamepadInUse = Math.abs(processedLeftX) > 0 || Math.abs(processedLeftY) > 0 || 
                             processedLeftTrigger > 0 || processedRightTrigger > 0;
         
         if (gamepadInUse) {
-            if (!gamepadActive) {
-                console.log('[Gamepad] Gamepad input detected, taking control');
+            if (processedLeftTrigger > 0 || processedRightTrigger > 0) {
+                const speedChange = (processedRightTrigger - processedLeftTrigger) * 0.02;
+                const newSpeed = Math.max(0, Math.min(1, speedMultiplier + speedChange));
+                
+                if (Math.abs(newSpeed - speedMultiplier) > 0.01) {
+                    speedMultiplier = newSpeed;
+                    const speedSlider = document.getElementById('speed-slider');
+                    if (speedSlider) speedSlider.value = speedMultiplier * 100;
+                    updateSpeedDisplay();
+                }
             }
-            gamepadActive = true;
             
-            // Update joystick position based on left stick
             joystickPosition.x = processedLeftX * JOYSTICK_RADIUS;
             joystickPosition.y = processedLeftY * JOYSTICK_RADIUS;
-            
-            // Update speed based on triggers
-            // L2 (left trigger) decreases speed, R2 (right trigger) increases speed
-            if (processedLeftTrigger > 0 || processedRightTrigger > 0) {
-                // Calculate speed change based on trigger pressure
-                const TRIGGER_SENSITIVITY = 0.015; // Adjust sensitivity (lower = slower change)
-                let speedChange = 0;
-                
-                if (processedRightTrigger > 0) {
-                    // R2 increases speed
-                    speedChange = processedRightTrigger * TRIGGER_SENSITIVITY;
-                }
-                if (processedLeftTrigger > 0) {
-                    // L2 decreases speed
-                    speedChange -= processedLeftTrigger * TRIGGER_SENSITIVITY;
-                }
-                
-                const newSpeed = speedMultiplier + speedChange;
-                const newSpeedClamped = Math.max(0, Math.min(1, newSpeed));
-                const speedChanged = Math.abs(newSpeedClamped - speedMultiplier) > 0.01;
-                
-                speedMultiplier = newSpeedClamped;
-                
-                // Update speed slider and display
-                const speedSlider = document.getElementById('speed-slider');
-                if (speedSlider) speedSlider.value = speedMultiplier * 100;
-                updateSpeedDisplay();
-                
-                // If speed changed significantly, log it
-                if (speedChanged) {
-                    const triggerInfo = processedRightTrigger > 0 ? 
-                        `R2 (${(processedRightTrigger * 100).toFixed(0)}%)` : 
-                        `L2 (${(processedLeftTrigger * 100).toFixed(0)}%)`;
-                    console.log(`[Gamepad] Speed changed via ${triggerInfo} to ${Math.round(speedMultiplier * 100)}%`);
-                }
-            }
+            gamepadActive = true;
             
             updateJoystickVisual();
             updateMotorValues();
             updateDirectionDisplay();
-            
-            // Debug log every few seconds with throttling info
-            if (Math.floor(timestamp / 3000) !== Math.floor((timestamp - UPDATE_INTERVAL) / 3000)) {
-                const motorValues = calculateMotorValues();
-                const currentZone = getCurrentDirectionZone();
-                console.log(`[Gamepad] Zone: ${currentZone}, Motors L:${motorValues.left} R:${motorValues.right}, Speed: ${Math.round(speedMultiplier * 100)}%`);
-            }
         } else if (gamepadActive) {
-            // Gamepad was active but now neutral - reset position
-            console.log('[Gamepad] Gamepad returned to neutral, releasing control');
-            gamepadActive = false;
             joystickPosition = { x: 0, y: 0 };
-            
-            // Reset direction zone tracking
-            lastDirectionZone = null;
-            lastZoneCommand = null;
-            
+            gamepadActive = false;
             updateJoystickVisual();
             updateMotorValues();
             updateDirectionDisplay();
         }
         
-        // Continue loop
         requestAnimationFrame(gamepadLoop);
     }
     
     requestAnimationFrame(gamepadLoop);
 }
 
-// Initialize when DOM is loaded
+// ===========================================
+// INICIALIZAÇÃO E EXPORTAÇÃO
+// ===========================================
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit to ensure other scripts are loaded
     setTimeout(() => {
         initializeJoystick();
         initializeKeyboardControl();
         initializeGamepadControl();
         
-        // Check if send command functions are available
         if (typeof sendSpeedCommandDebounced === 'function') {
-            console.log('[Joystick] sendSpeedCommandDebounced function available');
-        } else if (typeof sendSpeedCommand === 'function') {
-            console.log('[Joystick] sendSpeedCommand function available');
+            console.log('[Controls] Sistema de comandos disponível');
         } else {
-            console.warn('[Joystick] No send command functions found - commands will not work');
+            console.warn('[Controls] Sistema de comandos não encontrado');
         }
         
-        // Add navigation back to override
         const backSwitch = document.getElementById('back-override-switch');
         if (backSwitch) {
             backSwitch.addEventListener('click', function() {
@@ -700,11 +526,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Add stop mode switch listener
         const stopModeSwitch = document.getElementById('stop-mode-switch');
         if (stopModeSwitch) {
             stopModeSwitch.addEventListener('click', function() {
-                // Force update motor values when stop mode changes
                 setTimeout(() => {
                     updateMotorValues();
                     updateDirectionDisplay();
@@ -712,14 +536,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        console.log('[Joystick] Sistema de controle inicializado');
-        console.log('[Joystick] Controlos: Mouse/Touch no joystick, WASD ou setas, Espaço para parar');
-        console.log('[Gamepad] Sistema de gamepad inicializado');
-        console.log('[Gamepad] Controle Xbox: Stick esquerdo para direção, stick direito para velocidade');
+        console.log('[Controls] Sistema inicializado');
+        console.log('[Controls] Mouse/Touch, WASD/Setas, Espaço=Stop');
+        console.log('[Gamepad] Stick=Direção, Triggers=Velocidade, A=Headlamp, B=Stop');
     }, 100);
 });
 
-// Export functions for external use
+// Exportação para uso externo
 window.joystickControl = {
     getMotorValues: calculateMotorValues,
     getSpeedMultiplier: () => speedMultiplier,
@@ -732,10 +555,8 @@ window.joystickControl = {
         if (speedSlider) speedSlider.value = speedMultiplier * 100;
         updateSpeedDisplay();
         
-        // If speed changed, force immediate update
         if (speedChanged) {
-            console.log(`[Joystick] Speed programmatically changed to ${Math.round(speedMultiplier * 100)}% - forcing immediate command`);
-            // Force immediate command send
+            console.log(`[Controls] Velocidade alterada para ${Math.round(speedMultiplier * 100)}%`);
             if (typeof sendSpeedCommandWithSpeed === 'function') {
                 const motorValues = calculateMotorValues();
                 const stopModeSwitch = document.getElementById('stop-mode-switch');
@@ -753,8 +574,6 @@ window.joystickControl = {
     reset: () => {
         joystickPosition = { x: 0, y: 0 };
         gamepadActive = false;
-        
-        // Reset direction zone tracking
         lastDirectionZone = null;
         lastZoneCommand = null;
         
@@ -768,49 +587,26 @@ window.joystickControl = {
         active: gamepadActive,
         index: gamepadIndex
     }),
-    // New utility functions for command optimization
-    getCommandStats: () => {
-        if (typeof getCommandStats === 'function') {
-            return getCommandStats();
-        }
-        return { error: 'Stats not available' };
-    },
     getCurrentZone: () => getCurrentDirectionZone(),
     getLastZoneCommand: () => lastZoneCommand,
     forceZoneReset: () => {
         lastDirectionZone = null;
         lastZoneCommand = null;
-        console.log('[Joystick] Zone tracking reset - next movement will trigger command');
+        console.log('[Controls] Reset de zona forçado');
     },
     testGamepad: () => {
         if (gamepadIndex === -1) {
-            console.log('[Gamepad Test] No gamepad connected');
+            console.log('[Gamepad Test] Nenhum gamepad conectado');
             return;
         }
         const gamepad = navigator.getGamepads()[gamepadIndex];
         if (!gamepad) {
-            console.log('[Gamepad Test] Gamepad not found');
+            console.log('[Gamepad Test] Gamepad não encontrado');
             return;
         }
         console.log(`[Gamepad Test] ID: ${gamepad.id}`);
         console.log(`[Gamepad Test] Axes: [${gamepad.axes.map(a => a.toFixed(2)).join(', ')}]`);
         console.log(`[Gamepad Test] Buttons: [${gamepad.buttons.map(b => b.pressed ? '1' : '0').join(', ')}]`);
-        console.log(`[Gamepad Test] Button A (Headlamp): ${gamepad.buttons[0] ? (gamepad.buttons[0].pressed ? 'PRESSED' : 'Released') : 'N/A'}`);
-        console.log(`[Gamepad Test] Button B (Stop Mode): ${gamepad.buttons[1] ? (gamepad.buttons[1].pressed ? 'PRESSED' : 'Released') : 'N/A'}`);
-        
-        // Test trigger values
-        let leftTrigger = 0;
-        let rightTrigger = 0;
-        if (gamepad.axes.length > 6) leftTrigger = Math.max(0, gamepad.axes[6]);
-        if (gamepad.axes.length > 7) rightTrigger = Math.max(0, gamepad.axes[7]);
-        if (leftTrigger === 0 && gamepad.buttons[6]) leftTrigger = gamepad.buttons[6].value;
-        if (rightTrigger === 0 && gamepad.buttons[7]) rightTrigger = gamepad.buttons[7].value;
-        
-        console.log(`[Gamepad Test] L2 Trigger (Speed Down): ${(leftTrigger * 100).toFixed(1)}%`);
-        console.log(`[Gamepad Test] R2 Trigger (Speed Up): ${(rightTrigger * 100).toFixed(1)}%`);
-        
-        // Test sending command
-        console.log('[Gamepad Test] Testing motor command...');
         updateMotorValues();
     }
 };
