@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Avoid/Follow Switches</title>
+    <link rel="stylesheet" href="style-unified.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>Test dos Switches Avoid Object e Follow Object</h1>
+        
+        <div style="display: flex; gap: 20px; margin: 20px 0;">
+            <div class="side-toggle">
+                <span>Avoid O.</span>
+                <div class="switch" id="avoid-switch"></div>
+            </div>
+            
+            <div class="side-toggle">
+                <span>Follow O.</span>
+                <div class="switch" id="follow-switch"></div>
+            </div>
+        </div>
+        
+        <div id="status" style="margin: 20px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+            <p><strong>Status dos Switches:</strong></p>
+            <p>Avoid Object (E): <span id="avoid-status">false</span></p>
+            <p>Follow Object (F): <span id="follow-status">false</span></p>
+        </div>
+        
+        <div id="json-output" style="margin: 20px 0; padding: 10px; background: #e0e0e0; border-radius: 5px; font-family: monospace;">
+            <strong>JSON Command Preview:</strong><br>
+            <span id="json-preview">{"K": 0, "Q": 0, "D": 90, "M": false, "E": false, "F": false}</span>
+        </div>
+    </div>
+
+    <!-- Scripts necessários -->
+    <script src="rover-communication.js"></script>
+    <script src="rover-interface.js"></script>
+    
+    <script>
+        // Função para atualizar o status na tela
+        function updateStatus() {
+            if (typeof roverCommunication !== 'undefined') {
+                const avoidState = roverCommunication.getAvoidObjectState();
+                const followState = roverCommunication.getFollowObjectState();
+                
+                document.getElementById('avoid-status').textContent = avoidState;
+                document.getElementById('follow-status').textContent = followState;
+                
+                // Atualizar preview do JSON
+                const jsonPreview = {
+                    "K": 0,
+                    "Q": 0, 
+                    "D": 90,
+                    "M": false,
+                    "E": avoidState,
+                    "F": followState
+                };
+                
+                document.getElementById('json-preview').textContent = JSON.stringify(jsonPreview, null, 2);
+            }
+        }
+        
+        // Atualizar status a cada 500ms
+        setInterval(updateStatus, 500);
+        
+        // Atualizar status inicial após carregamento
+        setTimeout(updateStatus, 1000);
+    </script>
+</body>
+</html>

@@ -53,17 +53,17 @@
 
         <div class="status-box">
           <span class="status-label">Left IR</span>
-          <span class="status-value" id="left-ir-value">0</span>
+          <span class="status-value" id="left-ir-value">--</span>
         </div>
 
         <div class="status-box">
           <span class="status-label">Ultrasonic</span>
-          <span class="status-value" id="ultrasonic-value">0 cm</span>
+          <span class="status-value" id="ultrasonic-value">-- cm</span>
         </div>
 
         <div class="status-box">
           <span class="status-label">Right IR</span>
-          <span class="status-value" id="right-ir-value">0</span>
+          <span class="status-value" id="right-ir-value">--</span>
         </div>
 
         <div class="control-switch">
@@ -99,7 +99,7 @@
 
   </div>
 
-  <script src="dashboard.js"></script>
+ 
 </body>
 <script>
 // Remove focus do slider vertical ao sair com o mouse
@@ -109,6 +109,14 @@ document.querySelectorAll('.range-slider.vertical').forEach(function(slider) {
   });
 });
 </script>
+ <!-- 1. Sistema de comunicação (deve ser carregado primeiro) -->
+    <script src="rover-communication.js"></script>
+    
+    <!-- 2. Sistema de controles (depende da comunicação) -->
+    <script src="rover-controls.js"></script>
+    
+    <!-- 3. Sistema de interface (pode usar ambos os anteriores) -->
+    <script src="rover-interface.js"></script>
 </body>
 
 </html>

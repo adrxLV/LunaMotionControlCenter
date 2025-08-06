@@ -247,7 +247,16 @@
     </div>
   </div>
 
-  <script src="main-dashboard.js"></script>
+   <!-- 1. Sistema de comunicação (deve ser carregado primeiro) -->
+    <script src="rover-communication.js"></script>
+    
+    <!-- 2. Sistema de controles (depende da comunicação) -->
+    <script src="rover-controls.js"></script>
+    
+    <!-- 3. Sistema de interface (pode usar ambos os anteriores) -->
+    <script src="rover-interface.js"></script>
+
+    <!-- OLD: OLD JS/main-dashboard.js-->
 </body>
 
 </html>

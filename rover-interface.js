@@ -178,6 +178,22 @@ function initializeSwitches() {
                 }
             }
             
+            // Switch do avoid object
+            if (sw.id === 'avoid-switch') {
+                const state = sw.classList.contains('active');
+                if (typeof roverCommunication !== 'undefined') {
+                    roverCommunication.setAvoidObjectState(state);
+                }
+            }
+            
+            // Switch do follow object
+            if (sw.id === 'follow-switch') {
+                const state = sw.classList.contains('active');
+                if (typeof roverCommunication !== 'undefined') {
+                    roverCommunication.setFollowObjectState(state);
+                }
+            }
+            
             // Switch do slide lock
             if (sw.id === 'slide-lock-switch') {
                 slideLockActive = sw.classList.contains('active');
@@ -368,6 +384,7 @@ function updateStatusValues() {
     if (modeElement) {
         modeElement.textContent = 'Auto';
     }
+    
 }
 
 // ===========================================

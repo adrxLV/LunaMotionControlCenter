@@ -1068,6 +1068,96 @@ body.joystick-mode {
   margin-bottom: clamp(4px, 0.8vh, 8px);
 }
 
+/* ========== CAMERA ANGLE CONTROL ========== */
+.camera-angle-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2vh, 15px);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.9) 0%, rgba(0, 19, 48, 0.95) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.2);
+  border-radius: clamp(8px, 1.2vw, 15px);
+  padding: clamp(12px, 2vh, 18px);
+  width: clamp(120px, 13vw, 170px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 19, 48, 0.3);
+  transition: all 0.3s ease;
+}
+
+.camera-angle-control:hover {
+  border-color: rgba(255, 206, 52, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 19, 48, 0.4);
+  transform: translateY(-1px);
+}
+
+.camera-label {
+  color: #ffffff;
+  font-size: clamp(11px, 1.3vw, 16px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.camera-slider {
+  height: clamp(80px, 12vh, 120px);
+  width: clamp(25px, 3vw, 40px);
+}
+
+.camera-value {
+  color: #ffce34;
+  font-size: clamp(10px, 1.2vw, 14px);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ========== SLIDER CONTROL HEADER ========== */
+.slider-control-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: clamp(15px, 3vh, 25px);
+}
+
+.slider-mode-indicator {
+  color: #ffce34;
+  font-size: clamp(12px, 1.4vw, 18px);
+  font-weight: 600;
+  text-align: center;
+  padding: clamp(8px, 1.5vh, 12px);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.9) 0%, rgba(0, 19, 48, 0.95) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.3);
+  border-radius: clamp(6px, 1vw, 10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.slider-mode-indicator:hover {
+  border-color: rgba(255, 206, 52, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 19, 48, 0.3);
+  transform: translateY(-1px);
+}
+
+.slider-value-display {
+  margin-top: clamp(15px, 3vh, 25px);
+  text-align: center;
+}
+
+.slider-value-display span {
+  color: #ffce34;
+  font-size: clamp(14px, 1.6vw, 20px);
+  font-weight: 600;
+  padding: clamp(8px, 1.5vh, 12px);
+  background: linear-gradient(135deg, rgba(0, 19, 48, 0.8) 0%, rgba(0, 19, 48, 0.9) 100%);
+  border: 1px solid rgba(255, 206, 52, 0.2);
+  border-radius: clamp(6px, 1vw, 10px);
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  min-width: clamp(60px, 8vw, 100px);
+}
+
 .joystick-status-bar {
   position: absolute;
   bottom: clamp(25px, 4vh, 40px);
@@ -1115,6 +1205,18 @@ body.joystick-mode {
 .joystick-status:hover {
   border-color: rgba(255, 206, 52, 0.4);
   box-shadow: 0 2px 8px rgba(0, 19, 48, 0.3);
+}
+
+/* Camera angle status clickable */
+.joystick-status:has(#camera-angle-status) {
+  cursor: pointer;
+  user-select: none;
+}
+
+.joystick-status:has(#camera-angle-status):hover {
+  border-color: rgba(255, 206, 52, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 19, 48, 0.4);
+  transform: translateY(-1px);
 }
 
 .joystick-status .status-label {

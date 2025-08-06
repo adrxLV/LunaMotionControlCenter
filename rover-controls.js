@@ -11,6 +11,13 @@ let joystickPosition = { x: 0, y: 0 };
 let speedMultiplier = 0.5;
 let isDragging = false;
 
+// Camera control
+let cameraAngle = 90; // Ângulo inicial da câmera (0-180)
+window.cameraAngle = cameraAngle; // Torna a variável global para o sistema de comunicação
+
+// Slider mode control
+let currentSliderMode = 'speed'; // 'speed' ou 'camera'
+
 // Gamepad
 let gamepadActive = false;
 let gamepadIndex = -1;
@@ -47,6 +54,9 @@ function initializeJoystick() {
     const joystickKnob = document.getElementById('joystick-knob');
     const joystickBase = document.querySelector('.joystick-base');
     const speedSlider = document.getElementById('speed-slider');
+    const cameraSlider = document.getElementById('camera-angle-slider');
+    const sliderModeIndicator = document.getElementById('slider-mode-text');
+    const cameraAngleStatus = document.getElementById('camera-angle-status');
     
     if (!joystickKnob || !joystickBase || !speedSlider) return;
     
@@ -54,8 +64,34 @@ function initializeJoystick() {
     speedSlider.addEventListener('input', function() {
         speedMultiplier = parseInt(this.value) / 100;
         updateSpeedDisplay();
+        updateSliderValueDisplay();
         updateMotorValues();
     });
+
+    // Slider de ângulo da câmera
+    if (cameraSlider) {
+        cameraSlider.addEventListener('input', function() {
+            cameraAngle = parseInt(this.value);
+            window.cameraAngle = cameraAngle; // Atualiza a variável global
+            updateCameraAngleDisplay();
+            updateSliderValueDisplay();
+            updateMotorValues(); // Força envio do comando com novo ângulo
+        });
+    }
+
+    // Alternar entre sliders ao clicar no status da câmera
+    if (cameraAngleStatus) {
+        cameraAngleStatus.addEventListener('click', function() {
+            toggleSliderMode();
+        });
+    }
+
+    // Alternar entre sliders ao clicar no indicador do slider
+    if (sliderModeIndicator) {
+        sliderModeIndicator.addEventListener('click', function() {
+            toggleSliderMode();
+        });
+    }
     
     // Eventos do mouse
     joystickKnob.addEventListener('mousedown', startDrag);
@@ -68,6 +104,8 @@ function initializeJoystick() {
     document.addEventListener('touchend', stopDrag);
     
     updateSpeedDisplay();
+    updateCameraAngleDisplay();
+    updateSliderValueDisplay();
     updateMotorValues();
     updateDirectionDisplay();
 }
@@ -318,6 +356,49 @@ function updateDirectionDisplay() {
     if (directionElement) directionElement.textContent = displayText;
 }
 
+function updateCameraAngleDisplay() {
+    const cameraAngleElement = document.getElementById('camera-angle-value');
+    const cameraAngleStatusElement = document.getElementById('camera-angle-status');
+    
+    if (cameraAngleElement) cameraAngleElement.textContent = cameraAngle + '°';
+    if (cameraAngleStatusElement) cameraAngleStatusElement.textContent = cameraAngle + '°';
+}
+
+function toggleSliderMode() {
+    const speedContainer = document.getElementById('speed-slider-container');
+    const cameraContainer = document.getElementById('camera-slider-container');
+    const sliderModeText = document.getElementById('slider-mode-text');
+    
+    if (currentSliderMode === 'speed') {
+        // Mudar para modo câmera
+        currentSliderMode = 'camera';
+        if (speedContainer) speedContainer.style.display = 'none';
+        if (cameraContainer) cameraContainer.style.display = 'block';
+        if (sliderModeText) sliderModeText.textContent = 'Camera Angle';
+    } else {
+        // Mudar para modo velocidade
+        currentSliderMode = 'speed';
+        if (speedContainer) speedContainer.style.display = 'block';
+        if (cameraContainer) cameraContainer.style.display = 'none';
+        if (sliderModeText) sliderModeText.textContent = 'Speed Control';
+    }
+    
+    updateSliderValueDisplay();
+}
+
+function updateSliderValueDisplay() {
+    const valueDisplay = document.getElementById('current-slider-value');
+    
+    if (!valueDisplay) return;
+    
+    if (currentSliderMode === 'speed') {
+        const speedPercentage = Math.round(speedMultiplier * 100);
+        valueDisplay.textContent = speedPercentage + '%';
+    } else {
+        valueDisplay.textContent = cameraAngle + '°';
+    }
+}
+
 // ===========================================
 // SISTEMA DE TECLADO
 // ===========================================
@@ -448,6 +529,8 @@ function startGamepadLoop() {
         
         const leftStickX = gamepad.axes[0];
         const leftStickY = gamepad.axes[1];
+        const rightStickX = gamepad.axes[2] || 0; // Stick direito X
+        const rightStickY = gamepad.axes[3] || 0; // Stick direito Y
         
         let leftTrigger = 0;
         let rightTrigger = 0;
@@ -460,6 +543,7 @@ function startGamepadLoop() {
         
         let processedLeftX = Math.abs(leftStickX) > GAMEPAD_DEAD_ZONE ? leftStickX : 0;
         let processedLeftY = Math.abs(leftStickY) > GAMEPAD_DEAD_ZONE ? leftStickY : 0;
+        let processedRightY = Math.abs(rightStickY) > GAMEPAD_DEAD_ZONE ? rightStickY : 0;
         
         const TRIGGER_DEAD_ZONE = 0.05;
         let processedLeftTrigger = leftTrigger > TRIGGER_DEAD_ZONE ? leftTrigger : 0;
@@ -468,7 +552,23 @@ function startGamepadLoop() {
         handleGamepadButtons(gamepad);
         
         const gamepadInUse = Math.abs(processedLeftX) > 0 || Math.abs(processedLeftY) > 0 || 
-                            processedLeftTrigger > 0 || processedRightTrigger > 0;
+                            processedLeftTrigger > 0 || processedRightTrigger > 0 ||
+                            Math.abs(processedRightY) > 0;
+
+        // Controle da câmera com stick direito (eixo Y)
+        if (Math.abs(processedRightY) > 0) {
+            const cameraChange = -processedRightY * 2; // Invertido para controle intuitivo
+            const newCameraAngle = Math.max(0, Math.min(180, cameraAngle + cameraChange));
+            
+            if (Math.abs(newCameraAngle - cameraAngle) > 0.5) {
+                cameraAngle = Math.round(newCameraAngle);
+                window.cameraAngle = cameraAngle;
+                
+                const cameraSlider = document.getElementById('camera-angle-slider');
+                if (cameraSlider) cameraSlider.value = cameraAngle;
+                updateCameraAngleDisplay();
+            }
+        }
         
         if (gamepadInUse) {
             if (processedLeftTrigger > 0 || processedRightTrigger > 0) {
